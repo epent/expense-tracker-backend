@@ -1,4 +1,5 @@
 const express = require("express");
+const bodyParser = require("body-parser");
 
 const sequelize = require("./util/database");
 const Account = require("./models/account");
@@ -9,6 +10,8 @@ const Transfer = require("./models/transfer");
 
 const app = express();
 const port = process.env.PORT || 8080;
+
+app.use(bodyParser.json());
 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
