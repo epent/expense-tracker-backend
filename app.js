@@ -2,6 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 
 const sequelize = require("./util/database");
+const accountcategoryRoutes = require("./routes/accountcategory");
 const Account = require("./models/account");
 const Category = require("./models/category");
 const Expense = require("./models/expense");
@@ -22,6 +23,8 @@ app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
   next();
 });
+
+app.use(accountcategoryRoutes);
 
 Category.hasMany(Expense, {
   foreignKey: {
