@@ -13,10 +13,6 @@ const Income = sequelize.define("income", {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  to: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
   amount: {
     type: DataTypes.INTEGER,
     allowNull: false,

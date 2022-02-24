@@ -1,4 +1,5 @@
 const Expense = require("../models/expense");
+const Income = require("../models/income");
 
 exports.postExpense = async (req, res, next) => {
   console.log(req.body);
@@ -16,6 +17,27 @@ exports.postExpense = async (req, res, next) => {
     });
 
     res.status(201).json({ expense: expense });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+exports.postIncome = async (req, res, next) => {
+  console.log(req.body);
+  try {
+    const from = req.body.From;
+    const account = req.body.To;
+    const amount = req.body.Amount;
+    const date = req.body.Date;
+
+    const income = await Income.create({
+      from: from,
+      accountName: account,
+      amount: amount,
+      date: date,
+    });
+
+    res.status(201).json({ income: income });
   } catch (error) {
     console.log(error);
   }
