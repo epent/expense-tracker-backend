@@ -2,6 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 
 const sequelize = require("./util/database");
+const transactionRoutes = require("./routes/transaction");
 const accountcategoryRoutes = require("./routes/accountcategory");
 const Account = require("./models/account");
 const Category = require("./models/category");
@@ -24,6 +25,7 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use(transactionRoutes);
 app.use(accountcategoryRoutes);
 
 Category.hasMany(Expense, {
