@@ -21,6 +21,10 @@ const Transfer = sequelize.define("transfer", {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
+  date: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
 });
 
 module.exports = Transfer;

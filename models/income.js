@@ -21,6 +21,10 @@ const Income = sequelize.define("income", {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
+  date: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
 });
 
 module.exports = Income;
