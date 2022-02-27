@@ -50,14 +50,18 @@ Account.hasMany(Income, {
 Income.belongsTo(Account);
 
 Account.hasMany(Transfer, {
-  foreignKey: {
-    allowNull: false,
-  },
+  as: "AccountFrom",
+  foreignKey: "accountFromName",
+  allowNull: false,
 });
-Transfer.belongsTo(Account);
+Account.hasMany(Transfer, {
+  as: "AccountTo",
+  foreignKey: "accountToName",
+  allowNull: false,
+});
 
 sequelize
-  .sync({ force: true })
+  .sync()
   .then((result) => {
     app.listen(port);
   })

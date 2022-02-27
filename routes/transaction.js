@@ -8,4 +8,6 @@ router.post("/expense", transactionController.postExpense);
 
 router.post("/income", transactionController.postIncome);
 
+router.post("/transfer", transactionController.postTransfer);
+
 module.exports = router;

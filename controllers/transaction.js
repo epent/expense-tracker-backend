@@ -1,5 +1,6 @@
 const Expense = require("../models/expense");
 const Income = require("../models/income");
+const Transfer = require("../models/transfer");
 
 exports.postExpense = async (req, res, next) => {
   console.log(req.body);
@@ -38,6 +39,27 @@ exports.postIncome = async (req, res, next) => {
     });
 
     res.status(201).json({ income: income });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+exports.postTransfer = async (req, res, next) => {
+  console.log(req.body);
+  try {
+    const from = req.body.From;
+    const to = req.body.To;
+    const amount = req.body.Amount;
+    const date = req.body.Date;
+
+    const transfer = await Transfer.create({
+      accountFromName: from,
+      accountToName: to,
+      amount: amount,
+      date: date,
+    });
+
+    res.status(201).json({ transfer: transfer });
   } catch (error) {
     console.log(error);
   }
