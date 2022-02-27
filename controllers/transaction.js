@@ -1,3 +1,5 @@
+const Account = require("../models/account");
+const Category = require("../models/category");
 const Expense = require("../models/expense");
 const Income = require("../models/income");
 const Transfer = require("../models/transfer");
@@ -15,6 +17,14 @@ exports.postExpense = async (req, res, next) => {
       categoryName: category,
       amount: amount,
       date: date,
+    });
+
+    (await Account.findByPk(account)).decrement({
+      balance: amount,
+    });
+
+    (await Category.findByPk(category)).increment({
+      balance: amount,
     });
 
     res.status(201).json({ expense: expense });
