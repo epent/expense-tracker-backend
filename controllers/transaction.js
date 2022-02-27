@@ -1,5 +1,6 @@
 const Account = require("../models/account");
 const Category = require("../models/category");
+const Balance = require("../models/balance");
 const Expense = require("../models/expense");
 const Income = require("../models/income");
 const Transfer = require("../models/transfer");
@@ -27,6 +28,14 @@ exports.postExpense = async (req, res, next) => {
       balance: amount,
     });
 
+    (await Balance.findOne()).decrement({
+      total: amount,
+    });
+
+    (await Balance.findOne()).increment({
+      expenses: amount,
+    });
+
     res.status(201).json({ expense: expense });
   } catch (error) {
     console.log(error);
@@ -50,6 +59,11 @@ exports.postIncome = async (req, res, next) => {
 
     (await Account.findByPk(account)).increment({
       balance: amount,
+    });
+
+    (await Balance.findOne()).increment({
+      total: amount,
+      income: amount,
     });
 
     res.status(201).json({ income: income });
