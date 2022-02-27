@@ -48,9 +48,7 @@ exports.postIncome = async (req, res, next) => {
       date: date,
     });
 
-    await (
-      await Account.findByPk(account)
-    ).increment({
+    (await Account.findByPk(account)).increment({
       balance: amount,
     });
 
@@ -73,6 +71,14 @@ exports.postTransfer = async (req, res, next) => {
       accountToName: to,
       amount: amount,
       date: date,
+    });
+
+    (await Account.findByPk(from)).decrement({
+      balance: amount,
+    });
+
+    (await Account.findByPk(to)).increment({
+      balance: amount,
     });
 
     res.status(201).json({ transfer: transfer });
