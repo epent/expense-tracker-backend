@@ -4,6 +4,7 @@ const bodyParser = require("body-parser");
 const sequelize = require("./util/database");
 const transactionRoutes = require("./routes/transaction");
 const accountcategoryRoutes = require("./routes/accountcategory");
+const homeRoutes = require("./routes/home");
 const Account = require("./models/account");
 const Category = require("./models/category");
 const Expense = require("./models/expense");
@@ -27,6 +28,7 @@ app.use((req, res, next) => {
 
 app.use(transactionRoutes);
 app.use(accountcategoryRoutes);
+app.use(homeRoutes);
 
 Category.hasMany(Expense, {
   foreignKey: {
