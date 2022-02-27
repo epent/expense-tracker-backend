@@ -1,5 +1,6 @@
 const Account = require("../models/account");
 const Category = require("../models/category");
+const Balance = require("../models/balance");
 
 exports.postAccount = async (req, res, next) => {
   console.log(req.body);
@@ -12,6 +13,10 @@ exports.postAccount = async (req, res, next) => {
       name: name,
       category: category,
       balance: balance,
+    });
+
+    (await Balance.findOne()).increment({
+      total: balance,
     });
 
     res.status(201).json({ account: account });
