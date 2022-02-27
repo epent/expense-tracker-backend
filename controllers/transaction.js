@@ -48,6 +48,12 @@ exports.postIncome = async (req, res, next) => {
       date: date,
     });
 
+    await (
+      await Account.findByPk(account)
+    ).increment({
+      balance: amount,
+    });
+
     res.status(201).json({ income: income });
   } catch (error) {
     console.log(error);
