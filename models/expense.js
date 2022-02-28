@@ -4,10 +4,10 @@ const sequelize = require("../util/database");
 
 const Expense = sequelize.define("expense", {
   id: {
-    type: DataTypes.INTEGER,
-    autoIncrement: true,
-    allowNull: false,
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
     primaryKey: true,
+    allowNull: false,
   },
   amount: {
     type: DataTypes.INTEGER,

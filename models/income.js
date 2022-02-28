@@ -4,10 +4,10 @@ const sequelize = require("../util/database");
 
 const Income = sequelize.define("income", {
   id: {
-    type: DataTypes.INTEGER,
-    autoIncrement: true,
-    allowNull: false,
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
     primaryKey: true,
+    allowNull: false,
   },
   from: {
     type: DataTypes.STRING,
