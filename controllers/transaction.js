@@ -110,3 +110,13 @@ exports.getExpenses = async (req, res, next) => {
     console.log(error);
   }
 };
+
+exports.getIncomes = async (req, res, next) => {
+  try {
+    const incomes = await Income.findAll();
+
+    res.status(200).json(incomes);
+  } catch (error) {
+    console.log(error);
+  }
+};
