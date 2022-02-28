@@ -100,3 +100,13 @@ exports.postTransfer = async (req, res, next) => {
     console.log(error);
   }
 };
+
+exports.getExpenses = async (req, res, next) => {
+  try {
+    const expenses = await Expense.findAll();
+
+    res.status(200).json(expenses);
+  } catch (error) {
+    console.log(error);
+  }
+};

@@ -10,4 +10,6 @@ router.post("/income", transactionController.postIncome);
 
 router.post("/transfer", transactionController.postTransfer);
 
+router.get("/expenses", transactionController.getExpenses);
+
 module.exports = router;
