@@ -41,3 +41,23 @@ exports.postCategory = async (req, res, next) => {
     console.log(error);
   }
 };
+
+exports.getAccounts = async (req, res, next) => {
+  try {
+    const accounts = await Account.findAll();
+
+    res.status(200).json(accounts);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+exports.getCategories = async (req, res, next) => {
+  try {
+    const categories = await Category.findAll();
+
+    res.status(200).json(categories);
+  } catch (error) {
+    console.log(error);
+  }
+};
