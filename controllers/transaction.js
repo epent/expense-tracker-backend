@@ -269,3 +269,55 @@ exports.updateExpense = async (req, res, next) => {
     console.log(error);
   }
 };
+
+exports.updateIncome = async (req, res, next) => {
+  try {
+    const oldIncome = req.body.old;
+    const newIncome = req.body.new;
+    console.log(oldIncome.amount);
+    console.log(newIncome.amount);
+
+    await Income.update(
+      {
+        from: newIncome.from,
+        accountName: newIncome.to,
+        amount: newIncome.amount,
+        date: newIncome.date,
+      },
+      {
+        where: {
+          id: newIncome.id,
+        },
+      }
+    );
+
+    //update amount
+    if (oldIncome.amount !== newIncome.amount) {
+      (await Account.findByPk(oldIncome.accountName)).increment({
+        balance: newIncome.amount - oldIncome.amount,
+      });
+
+      (await Balance.findOne()).increment({
+        total: newIncome.amount - oldIncome.amount,
+        income: newIncome.amount - oldIncome.amount,
+      });
+    }
+
+    //update account
+    if (oldIncome.accountName !== newIncome.to) {
+      //old account
+      (await Account.findByPk(oldIncome.accountName)).decrement({
+        balance: newIncome.amount,
+      });
+
+      //new account
+      (await Account.findByPk(newIncome.to)).increment({
+        balance: newIncome.amount,
+      });
+    }
+
+    res.status(200).json(`Transaction ${newIncome.id} was updated`);
+  } catch (error) {
+    console.log(error);
+  }
+};

@@ -24,4 +24,6 @@ router.delete("/transfer", transactionController.deleteTransfer);
 
 router.put("/expense", transactionController.updateExpense);
 
+router.put("/income", transactionController.updateIncome);
+
 module.exports = router;
