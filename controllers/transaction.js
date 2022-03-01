@@ -6,7 +6,6 @@ const Income = require("../models/income");
 const Transfer = require("../models/transfer");
 
 exports.postExpense = async (req, res, next) => {
-  console.log(req.body);
   try {
     const account = req.body.From;
     const category = req.body.To;
@@ -43,7 +42,6 @@ exports.postExpense = async (req, res, next) => {
 };
 
 exports.postIncome = async (req, res, next) => {
-  console.log(req.body);
   try {
     const from = req.body.From;
     const account = req.body.To;
@@ -73,7 +71,6 @@ exports.postIncome = async (req, res, next) => {
 };
 
 exports.postTransfer = async (req, res, next) => {
-  console.log(req.body);
   try {
     const from = req.body.From;
     const to = req.body.To;
@@ -162,7 +159,6 @@ exports.deleteExpense = async (req, res, next) => {
 };
 
 exports.deleteIncome = async (req, res, next) => {
-  console.log(req.body);
   try {
     await Income.destroy({
       where: {
@@ -180,6 +176,28 @@ exports.deleteIncome = async (req, res, next) => {
     });
 
     res.status(200).json(`Transaction ${req.body.id} was deleted`);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+exports.deleteTransfer = async (req, res, next) => {
+  try {
+    await Transfer.destroy({
+      where: {
+        id: req.body.id,
+      },
+    });
+
+    (await Account.findByPk(req.body.accountFromName)).increment({
+      balance: req.body.amount,
+    });
+
+    (await Account.findByPk(req.body.accountToName)).decrement({
+      balance: req.body.amount,
+    });
+
+    res.status(201).json(`Transaction ${req.body.id} was deleted`);
   } catch (error) {
     console.log(error);
   }

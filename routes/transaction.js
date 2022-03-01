@@ -20,4 +20,6 @@ router.delete("/expense", transactionController.deleteExpense);
 
 router.delete("/income", transactionController.deleteIncome);
 
+router.delete("/transfer", transactionController.deleteTransfer);
+
 module.exports = router;
