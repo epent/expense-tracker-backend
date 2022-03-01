@@ -274,8 +274,6 @@ exports.updateIncome = async (req, res, next) => {
   try {
     const oldIncome = req.body.old;
     const newIncome = req.body.new;
-    console.log(oldIncome.amount);
-    console.log(newIncome.amount);
 
     await Income.update(
       {
@@ -317,6 +315,68 @@ exports.updateIncome = async (req, res, next) => {
     }
 
     res.status(200).json(`Transaction ${newIncome.id} was updated`);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+exports.updateTransfer = async (req, res, next) => {
+  try {
+    const oldTransfer = req.body.old;
+    const newTransfer = req.body.new;
+
+    await Transfer.update(
+      {
+        accountFromName: newTransfer.from,
+        accountToName: newTransfer.to,
+        amount: newTransfer.amount,
+        date: newTransfer.date,
+      },
+      {
+        where: {
+          id: newTransfer.id,
+        },
+      }
+    );
+
+    //update amount
+    if (oldTransfer.amount !== newTransfer.amount) {
+      (await Account.findByPk(oldTransfer.accountFromName)).increment({
+        balance: oldTransfer.amount - newTransfer.amount,
+      });
+
+      (await Account.findByPk(oldTransfer.accountToName)).increment({
+        balance: newTransfer.amount - oldTransfer.amount,
+      });
+    }
+
+    //update account "from"
+    if (oldTransfer.accountFromName !== newTransfer.from) {
+      //old account
+      (await Account.findByPk(oldTransfer.accountFromName)).increment({
+        balance: newTransfer.amount,
+      });
+
+      //new account
+      (await Account.findByPk(newTransfer.from)).decrement({
+        balance: newTransfer.amount,
+      });
+    }
+
+    //update account "to"
+    if (oldTransfer.accountToName !== newTransfer.to) {
+      //old account
+      (await Account.findByPk(oldTransfer.accountToName)).decrement({
+        balance: newTransfer.amount,
+      });
+
+      //new account
+      (await Account.findByPk(newTransfer.to)).increment({
+        balance: newTransfer.amount,
+      });
+    }
+
+    res.status(200).json({ transfer: transfer });
   } catch (error) {
     console.log(error);
   }

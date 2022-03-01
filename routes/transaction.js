@@ -26,4 +26,6 @@ router.put("/expense", transactionController.updateExpense);
 
 router.put("/income", transactionController.updateIncome);
 
+router.put("/transfer", transactionController.updateTransfer);
+
 module.exports = router;
