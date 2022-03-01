@@ -16,4 +16,6 @@ router.get("/incomes", transactionController.getIncomes);
 
 router.get("/transfers", transactionController.getTransfers);
 
+router.delete("/expense", transactionController.deleteExpense);
+
 module.exports = router;

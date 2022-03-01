@@ -130,3 +130,33 @@ exports.getTransfers = async (req, res, next) => {
     console.log(error);
   }
 };
+
+exports.deleteExpense = async (req, res, next) => {
+  try {
+    await Expense.destroy({
+      where: {
+        id: req.body.id,
+      },
+    });
+
+    (await Account.findByPk(req.body.accountName)).increment({
+      balance: req.body.amount,
+    });
+
+    (await Category.findByPk(req.body.categoryName)).decrement({
+      balance: req.body.amount,
+    });
+
+    (await Balance.findOne()).increment({
+      total: req.body.amount,
+    });
+
+    (await Balance.findOne()).decrement({
+      expenses: req.body.amount,
+    });
+
+    res.status(200).json(`Transaction ${req.body.id} was deleted`);
+  } catch (error) {
+    console.log(error);
+  }
+};
