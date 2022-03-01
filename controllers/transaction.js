@@ -202,3 +202,70 @@ exports.deleteTransfer = async (req, res, next) => {
     console.log(error);
   }
 };
+
+exports.updateExpense = async (req, res, next) => {
+  try {
+    const oldExpense = req.body.old;
+    const newExpense = req.body.new;
+
+    await Expense.update(
+      {
+        accountName: newExpense.from,
+        categoryName: newExpense.to,
+        amount: newExpense.amount,
+        date: newExpense.date,
+      },
+      {
+        where: {
+          id: newExpense.id,
+        },
+      }
+    );
+
+    //update amount
+    if (oldExpense.amount !== newExpense.amount) {
+      (await Account.findByPk(oldExpense.accountName)).increment({
+        balance: oldExpense.amount - newExpense.amount,
+      });
+
+      (await Category.findByPk(oldExpense.categoryName)).increment({
+        balance: newExpense.amount - oldExpense.amount,
+      });
+
+      (await Balance.findOne()).increment({
+        total: oldExpense.amount - newExpense.amount,
+        expenses: newExpense.amount - oldExpense.amount,
+      });
+    }
+
+    //update account
+    if (oldExpense.accountName !== newExpense.from) {
+      //old account
+      (await Account.findByPk(oldExpense.accountName)).increment({
+        balance: newExpense.amount,
+      });
+
+      //new account
+      (await Account.findByPk(newExpense.from)).decrement({
+        balance: newExpense.amount,
+      });
+    }
+
+    //update category
+    if (oldExpense.categoryName !== newExpense.to) {
+      //old category
+      (await Category.findByPk(oldExpense.categoryName)).decrement({
+        balance: newExpense.amount,
+      });
+
+      //new category
+      (await Category.findByPk(newExpense.to)).increment({
+        balance: newExpense.amount,
+      });
+    }
+
+    res.status(200).json(`Transaction ${newExpense.id} was updated`);
+  } catch (error) {
+    console.log(error);
+  }
+};
