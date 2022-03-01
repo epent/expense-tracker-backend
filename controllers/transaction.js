@@ -160,3 +160,27 @@ exports.deleteExpense = async (req, res, next) => {
     console.log(error);
   }
 };
+
+exports.deleteIncome = async (req, res, next) => {
+  console.log(req.body);
+  try {
+    await Income.destroy({
+      where: {
+        id: req.body.id,
+      },
+    });
+
+    (await Account.findByPk(req.body.accountName)).decrement({
+      balance: req.body.amount,
+    });
+
+    (await Balance.findOne()).decrement({
+      total: req.body.amount,
+      income: req.body.amount,
+    });
+
+    res.status(200).json(`Transaction ${req.body.id} was deleted`);
+  } catch (error) {
+    console.log(error);
+  }
+};
