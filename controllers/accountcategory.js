@@ -21,7 +21,10 @@ exports.postAccount = async (req, res, next) => {
 
     res.status(201).json({ account: account });
   } catch (error) {
-    console.log(error);
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+    next(error);
   }
 };
 
@@ -38,7 +41,10 @@ exports.postCategory = async (req, res, next) => {
 
     res.status(201).json({ category: category });
   } catch (error) {
-    console.log(error);
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+    next(error);
   }
 };
 
@@ -48,7 +54,10 @@ exports.getAccounts = async (req, res, next) => {
 
     res.status(200).json(accounts);
   } catch (error) {
-    console.log(error);
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+    next(error);
   }
 };
 
@@ -58,6 +67,9 @@ exports.getCategories = async (req, res, next) => {
 
     res.status(200).json(categories);
   } catch (error) {
-    console.log(error);
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+    next(error);
   }
 };

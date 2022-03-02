@@ -37,7 +37,10 @@ exports.postExpense = async (req, res, next) => {
 
     res.status(201).json({ expense: expense });
   } catch (error) {
-    console.log(error);
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+    next(error);
   }
 };
 
@@ -66,7 +69,10 @@ exports.postIncome = async (req, res, next) => {
 
     res.status(201).json({ income: income });
   } catch (error) {
-    console.log(error);
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+    next(error);
   }
 };
 
@@ -94,7 +100,10 @@ exports.postTransfer = async (req, res, next) => {
 
     res.status(201).json({ transfer: transfer });
   } catch (error) {
-    console.log(error);
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+    next(error);
   }
 };
 
@@ -104,7 +113,10 @@ exports.getExpenses = async (req, res, next) => {
 
     res.status(200).json(expenses);
   } catch (error) {
-    console.log(error);
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+    next(error);
   }
 };
 
@@ -114,7 +126,10 @@ exports.getIncomes = async (req, res, next) => {
 
     res.status(200).json(incomes);
   } catch (error) {
-    console.log(error);
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+    next(error);
   }
 };
 
@@ -124,7 +139,10 @@ exports.getTransfers = async (req, res, next) => {
 
     res.status(200).json(transfers);
   } catch (error) {
-    console.log(error);
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+    next(error);
   }
 };
 
@@ -154,7 +172,10 @@ exports.deleteExpense = async (req, res, next) => {
 
     res.status(200).json(`Transaction ${req.body.id} was deleted`);
   } catch (error) {
-    console.log(error);
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+    next(error);
   }
 };
 
@@ -177,7 +198,10 @@ exports.deleteIncome = async (req, res, next) => {
 
     res.status(200).json(`Transaction ${req.body.id} was deleted`);
   } catch (error) {
-    console.log(error);
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+    next(error);
   }
 };
 
@@ -199,7 +223,10 @@ exports.deleteTransfer = async (req, res, next) => {
 
     res.status(201).json(`Transaction ${req.body.id} was deleted`);
   } catch (error) {
-    console.log(error);
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+    next(error);
   }
 };
 
@@ -266,7 +293,10 @@ exports.updateExpense = async (req, res, next) => {
 
     res.status(200).json(`Transaction ${newExpense.id} was updated`);
   } catch (error) {
-    console.log(error);
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+    next(error);
   }
 };
 
@@ -316,7 +346,10 @@ exports.updateIncome = async (req, res, next) => {
 
     res.status(200).json(`Transaction ${newIncome.id} was updated`);
   } catch (error) {
-    console.log(error);
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+    next(error);
   }
 };
 
@@ -376,8 +409,11 @@ exports.updateTransfer = async (req, res, next) => {
       });
     }
 
-    res.status(200).json({ transfer: transfer });
+    res.status(200).json(`Transaction ${newTransfer.id} was updated`);
   } catch (error) {
-    console.log(error);
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+    next(error);
   }
 };
