@@ -235,7 +235,7 @@ exports.updateExpense = async (req, res, next) => {
     const oldExpense = req.body.old;
     const newExpense = req.body.new;
 
-    await Expense.update(
+    const result = await Expense.update(
       {
         accountName: newExpense.from,
         categoryName: newExpense.to,
@@ -248,6 +248,10 @@ exports.updateExpense = async (req, res, next) => {
         },
       }
     );
+
+    if (!result[0]) {
+      throw new Error("Updating expense failed");
+    }
 
     //update amount
     if (oldExpense.amount !== newExpense.amount) {
@@ -305,7 +309,7 @@ exports.updateIncome = async (req, res, next) => {
     const oldIncome = req.body.old;
     const newIncome = req.body.new;
 
-    await Income.update(
+    const result = await Income.update(
       {
         from: newIncome.from,
         accountName: newIncome.to,
@@ -318,6 +322,10 @@ exports.updateIncome = async (req, res, next) => {
         },
       }
     );
+
+    if (!result[0]) {
+      throw new Error("Updating income failed");
+    }
 
     //update amount
     if (oldIncome.amount !== newIncome.amount) {
@@ -358,7 +366,7 @@ exports.updateTransfer = async (req, res, next) => {
     const oldTransfer = req.body.old;
     const newTransfer = req.body.new;
 
-    await Transfer.update(
+    const result = await Transfer.update(
       {
         accountFromName: newTransfer.from,
         accountToName: newTransfer.to,
@@ -371,6 +379,10 @@ exports.updateTransfer = async (req, res, next) => {
         },
       }
     );
+
+    if (!result[0]) {
+      throw new Error("Updating transfer failed");
+    }
 
     //update amount
     if (oldTransfer.amount !== newTransfer.amount) {
