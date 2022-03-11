@@ -10,9 +10,9 @@ const Category = require("./models/category");
 const Expense = require("./models/expense");
 const Income = require("./models/income");
 const Transfer = require("./models/transfer");
+const Balance = require("./models/balance");
 
 const app = express();
-const port = process.env.PORT || 8080;
 
 app.use(bodyParser.json());
 
@@ -53,20 +53,31 @@ Income.belongsTo(Account);
 
 Account.hasMany(Transfer, {
   as: "AccountFrom",
-  foreignKey: "accountFromName",
-  allowNull: false,
+  foreignKey: {
+    name: "accountFromName",
+    allowNull: false,
+  },
 });
 Account.hasMany(Transfer, {
   as: "AccountTo",
-  foreignKey: "accountToName",
-  allowNull: false,
+  foreignKey: {
+    name: "accountToName",
+    allowNull: false,
+  },
 });
 
 sequelize
   .sync()
-  .then((result) => {
-    app.listen(port);
-  })
+  // .then(() => {
+  //   Balance.create({
+  //     name: "totalBalances",
+  //     total: 0,
+  //     income: 0,
+  //     expenses: 0,
+  //   });
+  // })
   .catch((err) => {
     console.error("Unable to connect to the database:", err);
   });
+
+module.exports = app;
