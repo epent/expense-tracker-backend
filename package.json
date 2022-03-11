@@ -5,13 +5,14 @@
   "main": "app.js",
   "scripts": {
     "test": "jest",
-    "start": "nodemon -r dotenv/config app.js"
+    "start": "nodemon -r dotenv/config server.js"
   },
   "author": "Elena Pentina",
   "license": "ISC",
   "devDependencies": {
     "jest": "^27.5.1",
-    "nodemon": "^2.0.15"
+    "nodemon": "^2.0.15",
+    "supertest": "^6.2.2"
   },
   "dependencies": {
     "body-parser": "^1.19.2",
