@@ -4,14 +4,25 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "jest",
+    "test": "cross-env NODE_ENV=test jest --testTimeout=10000",
     "start": "nodemon -r dotenv/config server.js"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "setupFiles": [
+      "<rootDir>/jest/setEnvVars.js"
+    ],
+    "coveragePathIgnorePatterns": [
+      "/node_modules/"
+    ]
   },
   "author": "Elena Pentina",
   "license": "ISC",
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "jest": "^27.5.1",
     "nodemon": "^2.0.15",
+    "sequelize-cli": "^6.4.1",
     "supertest": "^6.2.2"
   },
   "dependencies": {
@@ -20,6 +31,7 @@
     "express": "^4.17.3",
     "pg": "^8.7.3",
     "pg-hstore": "^2.3.4",
-    "sequelize": "^6.16.2"
+    "sequelize": "^6.16.2",
+    "uuid": "^8.3.2"
   }
 }
