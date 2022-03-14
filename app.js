@@ -1,16 +1,11 @@
+require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
 
-const sequelize = require("./util/database");
+const db = require("./db/models/index");
 const transactionRoutes = require("./routes/transaction");
 const accountcategoryRoutes = require("./routes/accountcategory");
 const homeRoutes = require("./routes/home");
-const Account = require("./models/account");
-const Category = require("./models/category");
-const Expense = require("./models/expense");
-const Income = require("./models/income");
-const Transfer = require("./models/transfer");
-const Balance = require("./models/balance");
 
 const app = express();
 
@@ -30,54 +25,8 @@ app.use(transactionRoutes);
 app.use(accountcategoryRoutes);
 app.use(homeRoutes);
 
-Category.hasMany(Expense, {
-  foreignKey: {
-    allowNull: false,
-  },
+db.sequelize.sync().catch((err) => {
+  console.error("Unable to connect to the database:", err);
 });
-Expense.belongsTo(Category);
-
-Account.hasMany(Expense, {
-  foreignKey: {
-    allowNull: false,
-  },
-});
-Expense.belongsTo(Account);
-
-Account.hasMany(Income, {
-  foreignKey: {
-    allowNull: false,
-  },
-});
-Income.belongsTo(Account);
-
-Account.hasMany(Transfer, {
-  as: "AccountFrom",
-  foreignKey: {
-    name: "accountFromName",
-    allowNull: false,
-  },
-});
-Account.hasMany(Transfer, {
-  as: "AccountTo",
-  foreignKey: {
-    name: "accountToName",
-    allowNull: false,
-  },
-});
-
-sequelize
-  .sync()
-  // .then(() => {
-  //   Balance.create({
-  //     name: "totalBalances",
-  //     total: 0,
-  //     income: 0,
-  //     expenses: 0,
-  //   });
-  // })
-  .catch((err) => {
-    console.error("Unable to connect to the database:", err);
-  });
 
 module.exports = app;
