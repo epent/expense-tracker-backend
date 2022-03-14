@@ -2,12 +2,12 @@
 
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.addConstraint("Incomes", {
+    await queryInterface.addConstraint("incomes", {
       fields: ["accountName"],
       type: "foreign key",
       name: "income_account_association",
       references: {
-        table: "Accounts",
+        table: "accounts",
         field: "name",
       },
     });
@@ -15,7 +15,7 @@ module.exports = {
 
   async down(queryInterface, Sequelize) {
     await queryInterface.removeConstraint(
-      "Incomes",
+      "incomes",
       "income_account_association"
     );
   },

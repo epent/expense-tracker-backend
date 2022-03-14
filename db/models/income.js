@@ -2,7 +2,7 @@
 
 module.exports = (sequelize, DataTypes) => {
   const Income = sequelize.define(
-    "Income",
+    "income",
     {
       id: {
         allowNull: false,
@@ -34,8 +34,8 @@ module.exports = (sequelize, DataTypes) => {
     {}
   );
   Income.associate = function (models) {
-    Income.belongsTo(models.Account);
-    models.Account.hasMany(Income);
+    Income.belongsTo(models.account);
+    models.account.hasMany(Income);
   };
 
   return Income;

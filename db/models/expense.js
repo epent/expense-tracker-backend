@@ -2,7 +2,7 @@
 
 module.exports = (sequelize, DataTypes) => {
   const Expense = sequelize.define(
-    "Expense",
+    "expense",
     {
       id: {
         allowNull: false,
@@ -30,11 +30,11 @@ module.exports = (sequelize, DataTypes) => {
     {}
   );
   Expense.associate = function (models) {
-    Expense.belongsTo(models.Account);
-    models.Account.hasMany(Expense);
+    Expense.belongsTo(models.account);
+    models.account.hasMany(Expense);
 
-    Expense.belongsTo(models.Category);
-    models.Category.hasMany(Expense);
+    Expense.belongsTo(models.category);
+    models.category.hasMany(Expense);
   };
 
   return Expense;

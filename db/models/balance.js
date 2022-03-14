@@ -2,7 +2,7 @@
 
 module.exports = (sequelize, DataTypes) => {
   const Balance = sequelize.define(
-    "Balance",
+    "balance",
     {
       name: {
         primaryKey: true,

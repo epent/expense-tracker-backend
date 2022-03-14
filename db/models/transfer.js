@@ -2,7 +2,7 @@
 
 module.exports = (sequelize, DataTypes) => {
   const Transfer = sequelize.define(
-    "Transfer",
+    "transfer",
     {
       id: {
         allowNull: false,
@@ -30,18 +30,14 @@ module.exports = (sequelize, DataTypes) => {
     {}
   );
   Transfer.associate = function (models) {
-    Transfer.belongsTo(models.Account);
-
-    Transfer.belongsTo(models.Account);
-
-    models.Account.hasMany(Transfer, {
+    models.account.hasMany(Transfer, {
       as: "AccountFrom",
       foreignKey: {
         name: "accountFromName",
         allowNull: false,
       },
     });
-    models.Account.hasMany(Transfer, {
+    models.account.hasMany(Transfer, {
       as: "AccountTo",
       foreignKey: {
         name: "accountToName",
