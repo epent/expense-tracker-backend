@@ -8,6 +8,7 @@ module.exports = {
     host: process.env.DB_HOST,
     dialect: "postgres",
     seederStorage: "sequelize",
+    logging: false,
   },
   test: {
     username: process.env.DB_USERNAME,
@@ -15,6 +16,7 @@ module.exports = {
     database: "expense_tracker_test",
     host: process.env.DB_HOST,
     dialect: "postgres",
+    logging: false,
   },
   production: {
     username: process.env.DB_USERNAME,
@@ -22,5 +24,6 @@ module.exports = {
     database: "expense_tracker_production",
     host: process.env.DB_HOST,
     dialect: "postgres",
+    logging: false,
   },
 };
