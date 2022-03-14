@@ -1,6 +1,7 @@
-const Account = require("../models/account");
-const Category = require("../models/category");
-const Balance = require("../models/balance");
+const db = require("../db/models");
+const Account = db.account;
+const Category = db.category;
+const Balance = db.balance;
 
 exports.postAccount = async (req, res, next) => {
   console.log(req.body);

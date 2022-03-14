@@ -1,9 +1,10 @@
-const Account = require("../models/account");
-const Category = require("../models/category");
-const Balance = require("../models/balance");
-const Expense = require("../models/expense");
-const Income = require("../models/income");
-const Transfer = require("../models/transfer");
+const db = require("../db/models");
+const Expense = db.expense;
+const Income = db.income;
+const Transfer = db.transfer;
+const Account = db.account;
+const Category = db.category;
+const Balance = db.balance;
 
 exports.postExpense = async (req, res, next) => {
   try {

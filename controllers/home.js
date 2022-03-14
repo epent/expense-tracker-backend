@@ -1,4 +1,5 @@
-const Balance = require("../models/balance");
+const db = require("../db/models");
+const Balance = db.balance;
 
 exports.getBalances = async (req, res, next) => {
   try {
