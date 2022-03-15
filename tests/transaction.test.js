@@ -254,3 +254,93 @@ describe("POST /income", () => {
     });
   });
 });
+
+describe("POST /transfer", () => {
+  describe("positive tests", () => {
+    test("should respond with status 201, transfer body", async () => {
+      const res = await request(app).post("/transfer").send({
+        Amount: 100,
+        Date: new Date(),
+        From: "Bank",
+        To: "Visa",
+      });
+
+      expect(res.statusCode).toEqual(201);
+      expect(res.body).toHaveProperty("transfer");
+    });
+
+    test("should increase transfers length", async () => {
+      const before = await request(app).get("/transfers");
+
+      await request(app).post("/transfer").send({
+        Amount: 100,
+        Date: new Date(),
+        From: "Bank",
+        To: "Visa",
+      });
+
+      const after = await request(app).get("/transfers");
+
+      expect(after.body.length).toBe(before.body.length + 1);
+    });
+
+    test("should update AccountFrom balance", async () => {
+      const req = {
+        Amount: 100,
+        Date: new Date(),
+        From: "Bank",
+        To: "Visa",
+      };
+      const before = await db.account.findByPk(req.From);
+
+      await request(app).post("/transfer").send(req);
+
+      const after = await db.account.findByPk(req.From);
+
+      expect(after.dataValues.balance).toBe(
+        before.dataValues.balance - req.Amount
+      );
+    });
+
+    test("should update AccountTo balance", async () => {
+      const req = {
+        Amount: 100,
+        Date: new Date(),
+        From: "Bank",
+        To: "Visa",
+      };
+      const before = await db.account.findByPk(req.To);
+
+      await request(app).post("/transfer").send(req);
+
+      const after = await db.account.findByPk(req.To);
+
+      expect(after.dataValues.balance).toBe(
+        before.dataValues.balance + req.Amount
+      );
+    });
+  });
+
+  describe("negative tests", () => {
+    test("should respond with status 422 - input is empty string", async () => {
+      const res = await request(app).post("/transfer").send({
+        Amount: 100,
+        Date: "",
+        From: "Bank",
+        To: "Visa",
+      });
+
+      expect(res.statusCode).toEqual(422);
+    });
+
+    test("should respond with status 422 - input is missing", async () => {
+      const res = await request(app).post("/transfer").send({
+        Date: new Date(),
+        From: "Bank",
+        To: "Visa",
+      });
+
+      expect(res.statusCode).toEqual(422);
+    });
+  });
+});
