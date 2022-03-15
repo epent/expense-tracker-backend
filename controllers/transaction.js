@@ -60,6 +60,19 @@ exports.postExpense = async (req, res, next) => {
 
 exports.postIncome = async (req, res, next) => {
   try {
+    Object.keys(req.body).forEach((key) => {
+      if (req.body[key] === "") {
+        const error = new Error("Input is empty string");
+        error.statusCode = 422;
+        throw error;
+      }
+    });
+    if (Object.keys(req.body).length !== 4) {
+      const error = new Error("Input is missing");
+      error.statusCode = 422;
+      throw error;
+    }
+
     const from = req.body.From;
     const account = req.body.To;
     const amount = req.body.Amount;
