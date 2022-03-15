@@ -4,8 +4,20 @@ const Category = db.category;
 const Balance = db.balance;
 
 exports.postAccount = async (req, res, next) => {
-  console.log(req.body);
   try {
+    Object.keys(req.body).forEach((key) => {
+      if (req.body[key] === "") {
+        const error = new Error("Input is empty string");
+        error.statusCode = 422;
+        throw error;
+      }
+    });
+    if (Object.keys(req.body).length !== 3) {
+      const error = new Error("Input is missing");
+      error.statusCode = 422;
+      throw error;
+    }
+
     const name = req.body.Name;
     const category = req.body.Category;
     const balance = req.body.Balance;
@@ -30,8 +42,20 @@ exports.postAccount = async (req, res, next) => {
 };
 
 exports.postCategory = async (req, res, next) => {
-  console.log(req.body);
   try {
+    Object.keys(req.body).forEach((key) => {
+      if (req.body[key] === "") {
+        const error = new Error("Input is empty string");
+        error.statusCode = 422;
+        throw error;
+      }
+    });
+    if (Object.keys(req.body).length !== 2) {
+      const error = new Error("Input is missing");
+      error.statusCode = 422;
+      throw error;
+    }
+
     const name = req.body.Name;
     const balance = req.body.Balance;
 
