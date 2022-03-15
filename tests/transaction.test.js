@@ -164,3 +164,93 @@ describe("POST /expense", () => {
     });
   });
 });
+
+describe("POST /income", () => {
+  describe("positive tests", () => {
+    test("should respond with status 201, income body", async () => {
+      const res = await request(app).post("/income").send({
+        Amount: 100,
+        Date: new Date(),
+        From: "Salary",
+        To: "Bank",
+      });
+
+      expect(res.statusCode).toEqual(201);
+      expect(res.body).toHaveProperty("income");
+    });
+
+    test("should increase incomes length", async () => {
+      const before = await request(app).get("/incomes");
+
+      await request(app).post("/income").send({
+        Amount: 100,
+        Date: new Date(),
+        From: "Salary",
+        To: "Bank",
+      });
+
+      const after = await request(app).get("/incomes");
+
+      expect(after.body.length).toBe(before.body.length + 1);
+    });
+
+    test("should update total and income Balance", async () => {
+      const before = await request(app).get("/balances");
+
+      const req = {
+        Amount: 100,
+        Date: new Date(),
+        From: "Salary",
+        To: "Bank",
+      };
+
+      await request(app).post("/income").send(req);
+
+      const after = await request(app).get("/balances");
+
+      expect(after.body.total).toBe(before.body.total + req.Amount);
+      expect(after.body.income).toBe(before.body.income + req.Amount);
+    });
+
+    test("should update Account balance", async () => {
+      const req = {
+        Amount: 100,
+        Date: new Date(),
+        From: "Salary",
+        To: "Bank",
+      };
+      const before = await db.account.findByPk(req.To);
+
+      await request(app).post("/income").send(req);
+
+      const after = await db.account.findByPk(req.To);
+
+      expect(after.dataValues.balance).toBe(
+        before.dataValues.balance + req.Amount
+      );
+    });
+  });
+
+  describe("negative tests", () => {
+    test("should respond with status 422 - input is empty string", async () => {
+      const res = await request(app).post("/income").send({
+        Amount: "",
+        Date: new Date(),
+        From: "Salary",
+        To: "Bank",
+      });
+
+      expect(res.statusCode).toEqual(422);
+    });
+
+    test("should respond with status 422 - input is missing", async () => {
+      const res = await request(app).post("/income").send({
+        Amount: 100,
+        Date: new Date(),
+        To: "Bank",
+      });
+
+      expect(res.statusCode).toEqual(422);
+    });
+  });
+});
