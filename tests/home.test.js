@@ -12,11 +12,10 @@ describe("GET /balances", () => {
       await request(app).get("/balances").expect("Content-Type", /json/);
     });
 
-    test("should respond with 0 balances", async () => {
+    test("should respond with 1 balance entry with name 'total_balances' ", async () => {
       const res = await request(app).get("/balances");
-      console.log(res.body);
 
-      expect(res.body.length).toBe(1);
+      expect(res.body.name).toBe("total_balances");
     });
   });
 });
