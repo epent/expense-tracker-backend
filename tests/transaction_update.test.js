@@ -5,19 +5,25 @@ const app = require("../app");
 
 describe("PUT /expense", () => {
   describe("positive tests", () => {
+    const oldForm = {
+      Amount: 10,
+      Date: new Date(),
+      From: "Visa",
+      To: "Food",
+    };
+
+    const newForm = {
+      amount: 100,
+      from: "Bank",
+      to: "Other",
+    };
+
     test("should respond with status 200", async () => {
-      const oldExpense = await request(app).post("/expense").send({
-        Amount: 10,
-        Date: new Date(),
-        From: "Visa",
-        To: "Food",
-      });
+      const oldExpense = await request(app).post("/expense").send(oldForm);
 
       const newExpense = {
         ...oldExpense.body.expense,
-        amount: 100,
-        from: "Bank",
-        to: "Other",
+        ...newForm,
       };
 
       const res = await request(app).put("/expense").send({
@@ -29,20 +35,13 @@ describe("PUT /expense", () => {
     });
 
     test("should update total and expenses Balance", async () => {
-      const oldExpense = await request(app).post("/expense").send({
-        Amount: 10,
-        Date: new Date(),
-        From: "Visa",
-        To: "Food",
-      });
+      const oldExpense = await request(app).post("/expense").send(oldForm);
 
       const before = await request(app).get("/balances");
 
       const newExpense = {
         ...oldExpense.body.expense,
-        amount: 100,
-        from: "Bank",
-        to: "Other",
+        ...newForm,
       };
 
       await request(app).put("/expense").send({
@@ -62,19 +61,6 @@ describe("PUT /expense", () => {
     });
 
     test("should update Account balance", async () => {
-      const oldForm = {
-        Amount: 10,
-        Date: new Date(),
-        From: "Visa",
-        To: "Food",
-      };
-
-      const newForm = {
-        amount: 100,
-        from: "Bank",
-        to: "Other",
-      };
-
       const oldExpense = await request(app).post("/expense").send(oldForm);
 
       const oldAccountBefore = await db.account.findByPk(oldForm.From);
@@ -104,19 +90,6 @@ describe("PUT /expense", () => {
     });
 
     test("should update Category balance", async () => {
-      const oldForm = {
-        Amount: 10,
-        Date: new Date(),
-        From: "Visa",
-        To: "Food",
-      };
-
-      const newForm = {
-        amount: 100,
-        from: "Bank",
-        to: "Other",
-      };
-
       const oldExpense = await request(app).post("/expense").send(oldForm);
 
       const oldCategoryBefore = await db.category.findByPk(oldForm.To);
@@ -146,19 +119,6 @@ describe("PUT /expense", () => {
     });
 
     test("should respond with updated expense transaction", async () => {
-      const oldForm = {
-        Amount: 10,
-        Date: new Date(),
-        From: "Visa",
-        To: "Food",
-      };
-
-      const newForm = {
-        amount: 100,
-        from: "Bank",
-        to: "Other",
-      };
-
       const oldExpense = await request(app).post("/expense").send(oldForm);
 
       const newExpense = {
@@ -182,19 +142,19 @@ describe("PUT /expense", () => {
 
 describe("PUT /income", () => {
   describe("positive tests", () => {
+    const oldForm = {
+      Amount: 100,
+      Date: new Date(),
+      From: "Salary",
+      To: "Bank",
+    };
+
+    const newForm = {
+      amount: 500,
+      to: "Visa",
+    };
+
     test("should respond with status 200", async () => {
-      const oldForm = {
-        Amount: 100,
-        Date: new Date(),
-        From: "Salary",
-        To: "Bank",
-      };
-
-      const newForm = {
-        amount: 500,
-        to: "Visa",
-      };
-
       const oldIncome = await request(app).post("/income").send(oldForm);
 
       const newIncome = {
@@ -211,18 +171,6 @@ describe("PUT /income", () => {
     });
 
     test("should update total and income Balance", async () => {
-      const oldForm = {
-        Amount: 100,
-        Date: new Date(),
-        From: "Salary",
-        To: "Bank",
-      };
-
-      const newForm = {
-        amount: 500,
-        to: "Visa",
-      };
-
       const oldIncome = await request(app).post("/income").send(oldForm);
 
       const before = await request(app).get("/balances");
@@ -248,18 +196,6 @@ describe("PUT /income", () => {
     });
 
     test("should update Account balance", async () => {
-      const oldForm = {
-        Amount: 100,
-        Date: new Date(),
-        From: "Salary",
-        To: "Bank",
-      };
-
-      const newForm = {
-        amount: 500,
-        to: "Visa",
-      };
-
       const oldIncome = await request(app).post("/income").send(oldForm);
 
       const oldAccountBefore = await db.account.findByPk(oldForm.To);
@@ -289,18 +225,6 @@ describe("PUT /income", () => {
     });
 
     test("should respond with updated income transaction", async () => {
-      const oldForm = {
-        Amount: 100,
-        Date: new Date(),
-        From: "Salary",
-        To: "Bank",
-      };
-
-      const newForm = {
-        amount: 500,
-        to: "Visa",
-      };
-
       const oldIncome = await request(app).post("/income").send(oldForm);
 
       const newIncome = {
@@ -323,20 +247,20 @@ describe("PUT /income", () => {
 
 describe("PUT /transfer", () => {
   describe("positive tests", () => {
+    const oldForm = {
+      Amount: 100,
+      Date: new Date(),
+      From: "Bank",
+      To: "Visa",
+    };
+
+    const newForm = {
+      amount: 500,
+      from: "Cash",
+      to: "Master card",
+    };
+
     test("should respond with status 200", async () => {
-      const oldForm = {
-        Amount: 100,
-        Date: new Date(),
-        From: "Bank",
-        To: "Visa",
-      };
-
-      const newForm = {
-        amount: 500,
-        to: "Bank",
-        from: "Visa",
-      };
-
       const oldTransfer = await request(app).post("/transfer").send(oldForm);
 
       const newTransfer = {
@@ -352,19 +276,6 @@ describe("PUT /transfer", () => {
     });
 
     test("should update AccountFrom balance", async () => {
-      const oldForm = {
-        Amount: 100,
-        Date: new Date(),
-        From: "Bank",
-        To: "Visa",
-      };
-
-      const newForm = {
-        amount: 500,
-        from: "Cash",
-        to: "Master card",
-      };
-
       const oldTransfer = await request(app).post("/transfer").send(oldForm);
 
       const oldAccountBefore = await db.account.findByPk(oldForm.From);
@@ -393,19 +304,6 @@ describe("PUT /transfer", () => {
     });
 
     test("should update AccountTo balance", async () => {
-      const oldForm = {
-        Amount: 100,
-        Date: new Date(),
-        From: "Bank",
-        To: "Visa",
-      };
-
-      const newForm = {
-        amount: 500,
-        from: "Cash",
-        to: "Master card",
-      };
-
       const oldTransfer = await request(app).post("/transfer").send(oldForm);
 
       const oldAccountBefore = await db.account.findByPk(oldForm.To);
@@ -435,19 +333,6 @@ describe("PUT /transfer", () => {
     });
 
     test("should respond with updated transfer transaction", async () => {
-      const oldForm = {
-        Amount: 100,
-        Date: new Date(),
-        From: "Bank",
-        To: "Visa",
-      };
-
-      const newForm = {
-        amount: 500,
-        from: "Cash",
-        to: "Master card",
-      };
-
       const oldTransfer = await request(app).post("/transfer").send(oldForm);
 
       const newTransfer = {
