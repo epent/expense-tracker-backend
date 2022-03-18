@@ -442,3 +442,79 @@ describe("DELETE /expense", () => {
     });
   });
 });
+
+describe("DELETE /income", () => {
+  describe("positive tests", () => {
+    test("should respond with status 204", async () => {
+      const income = await db.income.create({
+        amount: 100,
+        date: new Date(),
+        from: "Salary",
+        accountName: "Bank",
+      });
+
+      const res = await request(app).delete("/income").send(income.dataValues);
+
+      expect(res.statusCode).toEqual(204);
+    });
+
+    test("should update total and income Balance", async () => {
+      const before = await request(app).get("/balances");
+
+      const income = await db.income.create({
+        amount: 100,
+        date: new Date(),
+        from: "Salary",
+        accountName: "Bank",
+      });
+
+      await request(app).delete("/income").send(income.dataValues);
+
+      const after = await request(app).get("/balances");
+
+      expect(after.body.total).toBe(
+        before.body.total - income.dataValues.amount
+      );
+      expect(after.body.income).toBe(
+        before.body.income - income.dataValues.amount
+      );
+    });
+
+    test("should update Account balance", async () => {
+      const req = {
+        amount: 100,
+        date: new Date(),
+        from: "Salary",
+        accountName: "Bank",
+      };
+      const before = await db.account.findByPk(req.accountName);
+
+      const income = await db.income.create(req);
+
+      await request(app).delete("/income").send(income.dataValues);
+
+      const after = await db.account.findByPk(req.accountName);
+
+      expect(after.dataValues.balance).toBe(
+        before.dataValues.balance - req.amount
+      );
+    });
+  });
+
+  describe("negative tests", () => {
+    test("should fail to find the income by id", async () => {
+      const income = await db.income.create({
+        amount: 100,
+        date: new Date(),
+        from: "Salary",
+        accountName: "Bank",
+      });
+
+      await request(app).delete("/income").send(income.dataValues);
+
+      const res = await db.income.findByPk(income.dataValues.id);
+
+      expect(res).toBeNull();
+    });
+  });
+});
