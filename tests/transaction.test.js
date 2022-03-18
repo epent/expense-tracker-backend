@@ -518,3 +518,80 @@ describe("DELETE /income", () => {
     });
   });
 });
+
+describe("DELETE /transfer", () => {
+  describe("positive tests", () => {
+    test("should respond with status 204", async () => {
+      const transfer = await db.transfer.create({
+        amount: 100,
+        date: new Date(),
+        accountFromName: "Bank",
+        accountToName: "Visa",
+      });
+
+      const res = await request(app)
+        .delete("/transfer")
+        .send(transfer.dataValues);
+
+      expect(res.statusCode).toEqual(204);
+    });
+
+    test("should update AccountFrom balance", async () => {
+      const req = {
+        amount: 100,
+        date: new Date(),
+        accountFromName: "Bank",
+        accountToName: "Visa",
+      };
+
+      const before = await db.account.findByPk(req.accountFromName);
+
+      const transfer = await db.transfer.create(req);
+
+      await request(app).delete("/transfer").send(transfer.dataValues);
+
+      const after = await db.account.findByPk(req.accountFromName);
+
+      expect(after.dataValues.balance).toBe(
+        before.dataValues.balance + req.amount
+      );
+    });
+
+    test("should update AccountTo balance", async () => {
+      const req = {
+        amount: 100,
+        date: new Date(),
+        accountFromName: "Bank",
+        accountToName: "Visa",
+      };
+      const before = await db.account.findByPk(req.accountToName);
+
+      const transfer = await db.transfer.create(req);
+
+      await request(app).delete("/transfer").send(transfer.dataValues);
+
+      const after = await db.account.findByPk(req.accountToName);
+
+      expect(after.dataValues.balance).toBe(
+        before.dataValues.balance - req.amount
+      );
+    });
+  });
+
+  describe("negative tests", () => {
+    test("should fail to find the transfer by id", async () => {
+      const transfer = await db.transfer.create({
+        amount: 100,
+        date: new Date(),
+        accountFromName: "Bank",
+        accountToName: "Visa",
+      });
+
+      await request(app).delete("/transfer").send(transfer.dataValues);
+
+      const res = await db.transfer.findByPk(transfer.dataValues.id);
+
+      expect(res).toBeNull();
+    });
+  });
+});

@@ -261,7 +261,7 @@ exports.deleteTransfer = async (req, res, next) => {
       balance: req.body.amount,
     });
 
-    res.status(201).json(`Transaction ${req.body.id} was deleted`);
+    res.status(204).json(`Transaction ${req.body.id} was deleted`);
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
