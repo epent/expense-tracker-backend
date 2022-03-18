@@ -92,10 +92,8 @@ describe("PUT /expense", () => {
       });
 
       const oldAccountAfter = await db.account.findByPk(oldForm.From);
-      console.log(oldAccountAfter.dataValues);
 
       const newAccountAfter = await db.account.findByPk(newForm.from);
-      console.log(newAccountAfter.dataValues);
 
       expect(oldAccountAfter.dataValues.balance).toBe(
         oldAccountBefore.dataValues.balance + oldForm.Amount
@@ -178,6 +176,147 @@ describe("PUT /expense", () => {
       expect(res.dataValues.amount).toEqual(newForm.amount);
       expect(res.dataValues.accountName).toEqual(newForm.from);
       expect(res.dataValues.categoryName).toEqual(newForm.to);
+    });
+  });
+});
+
+describe("PUT /income", () => {
+  describe("positive tests", () => {
+    test("should respond with status 200", async () => {
+      const oldForm = {
+        Amount: 100,
+        Date: new Date(),
+        From: "Salary",
+        To: "Bank",
+      };
+
+      const newForm = {
+        amount: 500,
+        to: "Visa",
+      };
+
+      const oldIncome = await request(app).post("/income").send(oldForm);
+
+      const newIncome = {
+        ...oldIncome.body.income,
+        ...newForm,
+      };
+
+      const res = await request(app).put("/income").send({
+        old: oldIncome.body.income,
+        new: newIncome,
+      });
+
+      expect(res.statusCode).toEqual(200);
+    });
+
+    test("should update total and income Balance", async () => {
+      const oldForm = {
+        Amount: 100,
+        Date: new Date(),
+        From: "Salary",
+        To: "Bank",
+      };
+
+      const newForm = {
+        amount: 500,
+        to: "Visa",
+      };
+
+      const oldIncome = await request(app).post("/income").send(oldForm);
+
+      const before = await request(app).get("/balances");
+
+      const newIncome = {
+        ...oldIncome.body.income,
+        ...newForm,
+      };
+
+      await request(app).put("/income").send({
+        old: oldIncome.body.income,
+        new: newIncome,
+      });
+
+      const after = await request(app).get("/balances");
+
+      expect(after.body.total).toBe(
+        before.body.total + (newIncome.amount - oldIncome.body.income.amount)
+      );
+      expect(after.body.income).toBe(
+        before.body.income + (newIncome.amount - oldIncome.body.income.amount)
+      );
+    });
+
+    test("should update Account balance", async () => {
+      const oldForm = {
+        Amount: 100,
+        Date: new Date(),
+        From: "Salary",
+        To: "Bank",
+      };
+
+      const newForm = {
+        amount: 500,
+        to: "Visa",
+      };
+
+      const oldIncome = await request(app).post("/income").send(oldForm);
+
+      const oldAccountBefore = await db.account.findByPk(oldForm.To);
+
+      const newAccountBefore = await db.account.findByPk(newForm.to);
+
+      const newIncome = {
+        ...oldIncome.body.income,
+        ...newForm,
+      };
+
+      await request(app).put("/income").send({
+        old: oldIncome.body.income,
+        new: newIncome,
+      });
+
+      const oldAccountAfter = await db.account.findByPk(oldForm.To);
+
+      const newAccountAfter = await db.account.findByPk(newForm.to);
+
+      expect(oldAccountAfter.dataValues.balance).toBe(
+        oldAccountBefore.dataValues.balance - oldForm.Amount
+      );
+      expect(newAccountAfter.dataValues.balance).toBe(
+        newAccountBefore.dataValues.balance + newForm.amount
+      );
+    });
+
+    test("should respond with updated income transaction", async () => {
+      const oldForm = {
+        Amount: 100,
+        Date: new Date(),
+        From: "Salary",
+        To: "Bank",
+      };
+
+      const newForm = {
+        amount: 500,
+        to: "Visa",
+      };
+
+      const oldIncome = await request(app).post("/income").send(oldForm);
+
+      const newIncome = {
+        ...oldIncome.body.income,
+        ...newForm,
+      };
+
+      await request(app).put("/income").send({
+        old: oldIncome.body.income,
+        new: newIncome,
+      });
+
+      const res = await db.income.findByPk(oldIncome.body.income.id);
+
+      expect(res.dataValues.amount).toEqual(newForm.amount);
+      expect(res.dataValues.accountName).toEqual(newForm.to);
     });
   });
 });
