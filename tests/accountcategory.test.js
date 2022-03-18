@@ -14,10 +14,10 @@ describe("GET /accounts", () => {
       await request(app).get("/accounts").expect("Content-Type", /json/);
     });
 
-    test("should respond with 2 accounts", async () => {
+    test("should respond with 4 accounts", async () => {
       const res = await request(app).get("/accounts");
 
-      expect(res.body.length).toBe(2);
+      expect(res.body.length).toBe(4);
     });
   });
 });
