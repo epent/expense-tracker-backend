@@ -19,6 +19,20 @@ module.exports = {
           createdAt: new Date(),
           updatedAt: new Date(),
         },
+        {
+          name: "Master card",
+          category: "Credit card",
+          balance: 0,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          name: "Cash",
+          category: "Cash",
+          balance: 0,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
       ],
       {}
     );
