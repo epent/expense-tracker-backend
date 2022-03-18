@@ -59,13 +59,15 @@ describe("GET /transfers", () => {
 
 describe("POST /expense", () => {
   describe("positive tests", () => {
+    const req = {
+      Amount: 10,
+      Date: new Date(),
+      From: "Visa",
+      To: "Food",
+    };
+
     test("should respond with status 201, expense body", async () => {
-      const res = await request(app).post("/expense").send({
-        Amount: 10,
-        Date: new Date(),
-        From: "Visa",
-        To: "Food",
-      });
+      const res = await request(app).post("/expense").send(req);
 
       expect(res.statusCode).toEqual(201);
       expect(res.body).toHaveProperty("expense");
@@ -74,12 +76,7 @@ describe("POST /expense", () => {
     test("should increase expenses length", async () => {
       const before = await request(app).get("/expenses");
 
-      await request(app).post("/expense").send({
-        Amount: 10,
-        Date: new Date(),
-        From: "Visa",
-        To: "Food",
-      });
+      await request(app).post("/expense").send(req);
 
       const after = await request(app).get("/expenses");
 
@@ -88,13 +85,6 @@ describe("POST /expense", () => {
 
     test("should update total and expenses Balance", async () => {
       const before = await request(app).get("/balances");
-
-      const req = {
-        Amount: 10,
-        Date: new Date(),
-        From: "Visa",
-        To: "Food",
-      };
 
       await request(app).post("/expense").send(req);
 
@@ -105,12 +95,6 @@ describe("POST /expense", () => {
     });
 
     test("should update Account balance", async () => {
-      const req = {
-        Amount: 10,
-        Date: new Date(),
-        From: "Visa",
-        To: "Food",
-      };
       const before = await db.account.findByPk(req.From);
 
       await request(app).post("/expense").send(req);
@@ -123,12 +107,6 @@ describe("POST /expense", () => {
     });
 
     test("should update Category balance", async () => {
-      const req = {
-        Amount: 10,
-        Date: new Date(),
-        From: "Visa",
-        To: "Food",
-      };
       const before = await db.category.findByPk(req.To);
 
       await request(app).post("/expense").send(req);
@@ -167,14 +145,15 @@ describe("POST /expense", () => {
 
 describe("POST /income", () => {
   describe("positive tests", () => {
-    test("should respond with status 201, income body", async () => {
-      const res = await request(app).post("/income").send({
-        Amount: 100,
-        Date: new Date(),
-        From: "Salary",
-        To: "Bank",
-      });
+    const req = {
+      Amount: 100,
+      Date: new Date(),
+      From: "Salary",
+      To: "Bank",
+    };
 
+    test("should respond with status 201, income body", async () => {
+      const res = await request(app).post("/income").send(req);
       expect(res.statusCode).toEqual(201);
       expect(res.body).toHaveProperty("income");
     });
@@ -182,12 +161,7 @@ describe("POST /income", () => {
     test("should increase incomes length", async () => {
       const before = await request(app).get("/incomes");
 
-      await request(app).post("/income").send({
-        Amount: 100,
-        Date: new Date(),
-        From: "Salary",
-        To: "Bank",
-      });
+      await request(app).post("/income").send(req);
 
       const after = await request(app).get("/incomes");
 
@@ -196,13 +170,6 @@ describe("POST /income", () => {
 
     test("should update total and income Balance", async () => {
       const before = await request(app).get("/balances");
-
-      const req = {
-        Amount: 100,
-        Date: new Date(),
-        From: "Salary",
-        To: "Bank",
-      };
 
       await request(app).post("/income").send(req);
 
@@ -213,12 +180,6 @@ describe("POST /income", () => {
     });
 
     test("should update Account balance", async () => {
-      const req = {
-        Amount: 100,
-        Date: new Date(),
-        From: "Salary",
-        To: "Bank",
-      };
       const before = await db.account.findByPk(req.To);
 
       await request(app).post("/income").send(req);
@@ -257,13 +218,15 @@ describe("POST /income", () => {
 
 describe("POST /transfer", () => {
   describe("positive tests", () => {
+    const req = {
+      Amount: 100,
+      Date: new Date(),
+      From: "Bank",
+      To: "Visa",
+    };
+
     test("should respond with status 201, transfer body", async () => {
-      const res = await request(app).post("/transfer").send({
-        Amount: 100,
-        Date: new Date(),
-        From: "Bank",
-        To: "Visa",
-      });
+      const res = await request(app).post("/transfer").send(req);
 
       expect(res.statusCode).toEqual(201);
       expect(res.body).toHaveProperty("transfer");
@@ -272,12 +235,7 @@ describe("POST /transfer", () => {
     test("should increase transfers length", async () => {
       const before = await request(app).get("/transfers");
 
-      await request(app).post("/transfer").send({
-        Amount: 100,
-        Date: new Date(),
-        From: "Bank",
-        To: "Visa",
-      });
+      await request(app).post("/transfer").send(req);
 
       const after = await request(app).get("/transfers");
 
@@ -285,12 +243,6 @@ describe("POST /transfer", () => {
     });
 
     test("should update AccountFrom balance", async () => {
-      const req = {
-        Amount: 100,
-        Date: new Date(),
-        From: "Bank",
-        To: "Visa",
-      };
       const before = await db.account.findByPk(req.From);
 
       await request(app).post("/transfer").send(req);
@@ -303,12 +255,6 @@ describe("POST /transfer", () => {
     });
 
     test("should update AccountTo balance", async () => {
-      const req = {
-        Amount: 100,
-        Date: new Date(),
-        From: "Bank",
-        To: "Visa",
-      };
       const before = await db.account.findByPk(req.To);
 
       await request(app).post("/transfer").send(req);
@@ -346,14 +292,15 @@ describe("POST /transfer", () => {
 });
 
 describe("DELETE /expense", () => {
+  const req = {
+    Amount: 10,
+    Date: new Date(),
+    From: "Visa",
+    To: "Food",
+  };
   describe("positive tests", () => {
     test("should respond with status 204", async () => {
-      const expense = await request(app).post("/expense").send({
-        Amount: 10,
-        Date: new Date(),
-        From: "Visa",
-        To: "Food",
-      });
+      const expense = await request(app).post("/expense").send(req);
 
       const res = await request(app)
         .delete("/expense")
@@ -363,12 +310,7 @@ describe("DELETE /expense", () => {
     });
 
     test("should decrease expenses length", async () => {
-      const expense = await request(app).post("/expense").send({
-        Amount: 10,
-        Date: new Date(),
-        From: "Visa",
-        To: "Food",
-      });
+      const expense = await request(app).post("/expense").send(req);
 
       const before = await request(app).get("/expenses");
 
@@ -380,12 +322,7 @@ describe("DELETE /expense", () => {
     });
 
     test("should update total and expenses Balance", async () => {
-      const expense = await request(app).post("/expense").send({
-        Amount: 10,
-        Date: new Date(),
-        From: "Visa",
-        To: "Food",
-      });
+      const expense = await request(app).post("/expense").send(req);
 
       const before = await request(app).get("/balances");
 
@@ -402,13 +339,6 @@ describe("DELETE /expense", () => {
     });
 
     test("should update Account balance", async () => {
-      const req = {
-        Amount: 10,
-        Date: new Date(),
-        From: "Visa",
-        To: "Food",
-      };
-
       const expense = await request(app).post("/expense").send(req);
 
       const before = await db.account.findByPk(req.From);
@@ -423,13 +353,6 @@ describe("DELETE /expense", () => {
     });
 
     test("should update Category balance", async () => {
-      const req = {
-        Amount: 10,
-        Date: new Date(),
-        From: "Visa",
-        To: "Food",
-      };
-
       const expense = await request(app).post("/expense").send(req);
 
       const before = await db.category.findByPk(req.To);
@@ -446,12 +369,7 @@ describe("DELETE /expense", () => {
 
   describe("negative tests", () => {
     test("should fail to find the expense by id", async () => {
-      const expense = await request(app).post("/expense").send({
-        Amount: 10,
-        Date: new Date(),
-        From: "Visa",
-        To: "Food",
-      });
+      const expense = await request(app).post("/expense").send(req);
 
       await request(app).delete("/expense").send(expense.body.expense);
 
@@ -463,14 +381,16 @@ describe("DELETE /expense", () => {
 });
 
 describe("DELETE /income", () => {
+  const req = {
+    Amount: 100,
+    Date: new Date(),
+    From: "Salary",
+    To: "Bank",
+  };
+
   describe("positive tests", () => {
     test("should respond with status 204", async () => {
-      const income = await request(app).post("/income").send({
-        Amount: 100,
-        Date: new Date(),
-        From: "Salary",
-        To: "Bank",
-      });
+      const income = await request(app).post("/income").send(req);
 
       const res = await request(app).delete("/income").send(income.body.income);
 
@@ -478,12 +398,7 @@ describe("DELETE /income", () => {
     });
 
     test("should decrease incomes length", async () => {
-      const income = await request(app).post("/income").send({
-        Amount: 100,
-        Date: new Date(),
-        From: "Salary",
-        To: "Bank",
-      });
+      const income = await request(app).post("/income").send(req);
 
       const before = await request(app).get("/incomes");
 
@@ -495,12 +410,7 @@ describe("DELETE /income", () => {
     });
 
     test("should update total and income Balance", async () => {
-      const income = await request(app).post("/income").send({
-        Amount: 100,
-        Date: new Date(),
-        From: "Salary",
-        To: "Bank",
-      });
+      const income = await request(app).post("/income").send(req);
 
       const before = await request(app).get("/balances");
 
@@ -517,13 +427,6 @@ describe("DELETE /income", () => {
     });
 
     test("should update Account balance", async () => {
-      const req = {
-        Amount: 100,
-        Date: new Date(),
-        From: "Salary",
-        To: "Bank",
-      };
-
       const income = await request(app).post("/income").send(req);
 
       const before = await db.account.findByPk(req.To);
@@ -540,12 +443,7 @@ describe("DELETE /income", () => {
 
   describe("negative tests", () => {
     test("should fail to find the income by id", async () => {
-      const income = await request(app).post("/income").send({
-        Amount: 100,
-        Date: new Date(),
-        From: "Salary",
-        To: "Bank",
-      });
+      const income = await request(app).post("/income").send(req);
 
       await request(app).delete("/income").send(income.body.income);
 
@@ -557,14 +455,16 @@ describe("DELETE /income", () => {
 });
 
 describe("DELETE /transfer", () => {
+  const req = {
+    Amount: 100,
+    Date: new Date(),
+    From: "Bank",
+    To: "Visa",
+  };
+
   describe("positive tests", () => {
     test("should respond with status 204", async () => {
-      const transfer = await request(app).post("/transfer").send({
-        Amount: 100,
-        Date: new Date(),
-        From: "Bank",
-        To: "Visa",
-      });
+      const transfer = await request(app).post("/transfer").send(req);
 
       const res = await request(app)
         .delete("/transfer")
@@ -574,12 +474,7 @@ describe("DELETE /transfer", () => {
     });
 
     test("should decrease transfers length", async () => {
-      const transfer = await request(app).post("/transfer").send({
-        Amount: 100,
-        Date: new Date(),
-        From: "Bank",
-        To: "Visa",
-      });
+      const transfer = await request(app).post("/transfer").send(req);
 
       const before = await request(app).get("/transfers");
 
@@ -591,13 +486,6 @@ describe("DELETE /transfer", () => {
     });
 
     test("should update AccountFrom balance", async () => {
-      const req = {
-        Amount: 100,
-        Date: new Date(),
-        From: "Bank",
-        To: "Visa",
-      };
-
       const transfer = await request(app).post("/transfer").send(req);
 
       const before = await db.account.findByPk(req.From);
@@ -612,13 +500,6 @@ describe("DELETE /transfer", () => {
     });
 
     test("should update AccountTo balance", async () => {
-      const req = {
-        Amount: 100,
-        Date: new Date(),
-        From: "Bank",
-        To: "Visa",
-      };
-
       const transfer = await request(app).post("/transfer").send(req);
 
       const before = await db.account.findByPk(req.To);
@@ -635,12 +516,7 @@ describe("DELETE /transfer", () => {
 
   describe("negative tests", () => {
     test("should fail to find the transfer by id", async () => {
-      const transfer = await request(app).post("/transfer").send({
-        Amount: 100,
-        Date: new Date(),
-        From: "Bank",
-        To: "Visa",
-      });
+      const transfer = await request(app).post("/transfer").send(req);
 
       await request(app).delete("/transfer").send(transfer.body.transfer);
 
