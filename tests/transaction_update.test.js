@@ -320,3 +320,151 @@ describe("PUT /income", () => {
     });
   });
 });
+
+describe("PUT /transfer", () => {
+  describe("positive tests", () => {
+    test("should respond with status 200", async () => {
+      const oldForm = {
+        Amount: 100,
+        Date: new Date(),
+        From: "Bank",
+        To: "Visa",
+      };
+
+      const newForm = {
+        amount: 500,
+        to: "Bank",
+        from: "Visa",
+      };
+
+      const oldTransfer = await request(app).post("/transfer").send(oldForm);
+
+      const newTransfer = {
+        ...oldTransfer.body.transfer,
+        ...newForm,
+      };
+      const res = await request(app).put("/transfer").send({
+        old: oldTransfer.body.transfer,
+        new: newTransfer,
+      });
+
+      expect(res.statusCode).toEqual(200);
+    });
+
+    test("should update AccountFrom balance", async () => {
+      const oldForm = {
+        Amount: 100,
+        Date: new Date(),
+        From: "Bank",
+        To: "Visa",
+      };
+
+      const newForm = {
+        amount: 500,
+        from: "Cash",
+        to: "Master card",
+      };
+
+      const oldTransfer = await request(app).post("/transfer").send(oldForm);
+
+      const oldAccountBefore = await db.account.findByPk(oldForm.From);
+
+      const newAccountBefore = await db.account.findByPk(newForm.from);
+
+      const newTransfer = {
+        ...oldTransfer.body.transfer,
+        ...newForm,
+      };
+      await request(app).put("/transfer").send({
+        old: oldTransfer.body.transfer,
+        new: newTransfer,
+      });
+
+      const oldAccountAfter = await db.account.findByPk(oldForm.From);
+
+      const newAccountAfter = await db.account.findByPk(newForm.from);
+
+      expect(oldAccountAfter.dataValues.balance).toBe(
+        oldAccountBefore.dataValues.balance + oldForm.Amount
+      );
+      expect(newAccountAfter.dataValues.balance).toBe(
+        newAccountBefore.dataValues.balance - newForm.amount
+      );
+    });
+
+    test("should update AccountTo balance", async () => {
+      const oldForm = {
+        Amount: 100,
+        Date: new Date(),
+        From: "Bank",
+        To: "Visa",
+      };
+
+      const newForm = {
+        amount: 500,
+        from: "Cash",
+        to: "Master card",
+      };
+
+      const oldTransfer = await request(app).post("/transfer").send(oldForm);
+
+      const oldAccountBefore = await db.account.findByPk(oldForm.To);
+
+      const newAccountBefore = await db.account.findByPk(newForm.to);
+
+      const newTransfer = {
+        ...oldTransfer.body.transfer,
+        ...newForm,
+      };
+
+      await request(app).put("/transfer").send({
+        old: oldTransfer.body.transfer,
+        new: newTransfer,
+      });
+
+      const oldAccountAfter = await db.account.findByPk(oldForm.To);
+
+      const newAccountAfter = await db.account.findByPk(newForm.to);
+
+      expect(oldAccountAfter.dataValues.balance).toBe(
+        oldAccountBefore.dataValues.balance - oldForm.Amount
+      );
+      expect(newAccountAfter.dataValues.balance).toBe(
+        newAccountBefore.dataValues.balance + newForm.amount
+      );
+    });
+
+    test("should respond with updated transfer transaction", async () => {
+      const oldForm = {
+        Amount: 100,
+        Date: new Date(),
+        From: "Bank",
+        To: "Visa",
+      };
+
+      const newForm = {
+        amount: 500,
+        from: "Cash",
+        to: "Master card",
+      };
+
+      const oldTransfer = await request(app).post("/transfer").send(oldForm);
+
+      const newTransfer = {
+        ...oldTransfer.body.transfer,
+        ...newForm,
+      };
+
+      await request(app).put("/transfer").send({
+        old: oldTransfer.body.transfer,
+        new: newTransfer,
+      });
+
+      const res = await db.transfer.findByPk(oldTransfer.body.transfer.id);
+
+      expect(res.dataValues.amount).toEqual(newForm.amount);
+      expect(res.dataValues.accountFromName).toEqual(newForm.from);
+      expect(res.dataValues.accountToName).toEqual(newForm.to);
+    });
+  });
+});
