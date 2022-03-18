@@ -344,3 +344,101 @@ describe("POST /transfer", () => {
     });
   });
 });
+
+describe("DELETE /expense", () => {
+  describe("positive tests", () => {
+    test("should respond with status 204", async () => {
+      const expense = await db.expense.create({
+        amount: 10,
+        date: new Date(),
+        accountName: "Visa",
+        categoryName: "Food",
+      });
+
+      const res = await request(app)
+        .delete("/expense")
+        .send(expense.dataValues);
+
+      expect(res.statusCode).toEqual(204);
+    });
+
+    test("should update total and expenses Balance", async () => {
+      const before = await request(app).get("/balances");
+
+      const expense = await db.expense.create({
+        amount: 10,
+        date: new Date(),
+        accountName: "Visa",
+        categoryName: "Food",
+      });
+
+      await request(app).delete("/expense").send(expense.dataValues);
+
+      const after = await request(app).get("/balances");
+
+      expect(after.body.total).toBe(
+        before.body.total + expense.dataValues.amount
+      );
+      expect(after.body.expenses).toBe(
+        before.body.expenses - expense.dataValues.amount
+      );
+    });
+
+    test("should update Account balance", async () => {
+      const req = {
+        amount: 10,
+        date: new Date(),
+        accountName: "Visa",
+        categoryName: "Food",
+      };
+      const before = await db.account.findByPk(req.accountName);
+
+      const expense = await db.expense.create(req);
+
+      await request(app).delete("/expense").send(expense.dataValues);
+
+      const after = await db.account.findByPk(req.accountName);
+
+      expect(after.dataValues.balance).toBe(
+        before.dataValues.balance + req.amount
+      );
+    });
+
+    test("should update Category balance", async () => {
+      const req = {
+        amount: 10,
+        date: new Date(),
+        accountName: "Visa",
+        categoryName: "Food",
+      };
+      const before = await db.category.findByPk(req.categoryName);
+
+      const expense = await db.expense.create(req);
+
+      await request(app).delete("/expense").send(expense.dataValues);
+
+      const after = await db.category.findByPk(req.categoryName);
+
+      expect(after.dataValues.balance).toBe(
+        before.dataValues.balance - req.amount
+      );
+    });
+  });
+
+  describe("negative tests", () => {
+    test("should fail to find the expense by id", async () => {
+      const expense = await db.expense.create({
+        amount: 10,
+        date: new Date(),
+        accountName: "Visa",
+        categoryName: "Food",
+      });
+
+      await request(app).delete("/expense").send(expense.dataValues);
+
+      const res = await db.expense.findByPk(expense.dataValues.id);
+
+      expect(res).toBeNull();
+    });
+  });
+});
