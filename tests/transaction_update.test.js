@@ -536,7 +536,6 @@ describe("PUT /transfer", () => {
             ...transfer.body.transfer,
           };
           delete oldTransfer[key];
-          console.log(oldTransfer);
 
           const response = await request(app).put("/transfer").send({
             old: oldTransfer,
