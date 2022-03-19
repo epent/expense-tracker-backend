@@ -6,6 +6,7 @@ const db = require("./db/models/index");
 const transactionRoutes = require("./routes/transaction");
 const accountcategoryRoutes = require("./routes/accountcategory");
 const homeRoutes = require("./routes/home");
+const authRoutes = require("./routes/auth");
 
 const app = express();
 
@@ -24,6 +25,7 @@ app.use((req, res, next) => {
 app.use(transactionRoutes);
 app.use(accountcategoryRoutes);
 app.use(homeRoutes);
+app.use(authRoutes);
 
 db.sequelize.sync().catch((err) => {
   console.error("Unable to connect to the database:", err);
