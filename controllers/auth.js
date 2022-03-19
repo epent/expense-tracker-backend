@@ -1,3 +1,5 @@
+const bcrypt = require("bcrypt");
+
 const db = require("../db/models");
 const User = db.user;
 
@@ -8,11 +10,13 @@ exports.signup = async (req, res, next) => {
     const email = req.body.Email;
     const password = req.body.Password;
 
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const user = await User.create({
       firstName: firstName,
       lastName: lastName,
       email: email,
-      password: password,
+      password: hashedPassword,
     });
 
     res.status(201).json({ user: user });
@@ -31,6 +35,11 @@ exports.login = async (req, res, next) => {
         email: req.body.Email,
       },
     });
+
+    const isEqual = await bcrypt.compare(
+      req.body.Password,
+      user.dataValues.password
+    );
 
     res.status(200).json(user);
   } catch (error) {
