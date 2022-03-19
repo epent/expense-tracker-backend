@@ -4,20 +4,19 @@ const db = require("../db/models");
 const app = require("../app");
 
 describe("PUT /expense", () => {
+  const oldForm = {
+    Amount: 10,
+    Date: new Date(),
+    From: "Visa",
+    To: "Food",
+  };
+
+  const newForm = {
+    amount: 100,
+    from: "Bank",
+    to: "Other",
+  };
   describe("positive tests", () => {
-    const oldForm = {
-      Amount: 10,
-      Date: new Date(),
-      From: "Visa",
-      To: "Food",
-    };
-
-    const newForm = {
-      amount: 100,
-      from: "Bank",
-      to: "Other",
-    };
-
     test("should respond with status 200", async () => {
       const oldExpense = await request(app).post("/expense").send(oldForm);
 
@@ -136,6 +135,71 @@ describe("PUT /expense", () => {
       expect(res.dataValues.amount).toEqual(newForm.amount);
       expect(res.dataValues.accountName).toEqual(newForm.from);
       expect(res.dataValues.categoryName).toEqual(newForm.to);
+    });
+  });
+
+  describe("negative tests", () => {
+    test("should respond with status 422 - req.body content is missing", async () => {
+      const oldExpense = await request(app).post("/expense").send(oldForm);
+
+      const newExpense = {
+        ...oldExpense.body.expense,
+        ...newForm,
+      };
+
+      const res1 = await request(app).put("/expense").send({
+        new: newExpense,
+      });
+      const res2 = await request(app).put("/expense").send({
+        old: oldExpense.body.expense,
+      });
+
+      expect(res1.statusCode).toEqual(422);
+      expect(res2.statusCode).toEqual(422);
+    });
+
+    test("should respond with status 422 - req.body.new content is missing", async () => {
+      const oldExpense = await request(app).post("/expense").send(oldForm);
+
+      for (let key in newForm) {
+        const newExpense = {
+          ...oldExpense.body.expense,
+          ...newForm,
+        };
+        delete newExpense[key];
+
+        const response = await request(app).put("/expense").send({
+          old: oldExpense.body.expense,
+          new: newExpense,
+        });
+
+        expect(response.statusCode).toEqual(422);
+      }
+    });
+
+    test("should respond with status 422 - req.body.old content is missing", async () => {
+      const expense = await request(app).post("/expense").send(oldForm);
+
+      const newExpense = {
+        ...expense.body.expense,
+        ...newForm,
+      };
+
+      for (let key in expense.body.expense) {
+        if (key !== "updatedAt" && key !== "createdAt") {
+          const oldExpense = {
+            ...expense.body.expense,
+          };
+          delete oldExpense[key];
+
+          const response = await request(app).put("/expense").send({
+            old: oldExpense,
+            new: newExpense,
+          });
+
+          expect(response.statusCode).toEqual(422);
+        }
+      }
     });
   });
 });
