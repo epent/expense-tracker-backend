@@ -376,20 +376,20 @@ describe("PUT /income", () => {
 });
 
 describe("PUT /transfer", () => {
+  const oldForm = {
+    Amount: 100,
+    Date: new Date(),
+    From: "Bank",
+    To: "Visa",
+  };
+
+  const newForm = {
+    amount: 500,
+    from: "Cash",
+    to: "Master card",
+  };
+
   describe("positive tests", () => {
-    const oldForm = {
-      Amount: 100,
-      Date: new Date(),
-      From: "Bank",
-      To: "Visa",
-    };
-
-    const newForm = {
-      amount: 500,
-      from: "Cash",
-      to: "Master card",
-    };
-
     test("should respond with status 200", async () => {
       const oldTransfer = await request(app).post("/transfer").send(oldForm);
 
@@ -480,6 +480,72 @@ describe("PUT /transfer", () => {
       expect(res.dataValues.amount).toEqual(newForm.amount);
       expect(res.dataValues.accountFromName).toEqual(newForm.from);
       expect(res.dataValues.accountToName).toEqual(newForm.to);
+    });
+  });
+
+  describe("negative tests", () => {
+    test("should respond with status 422 - req.body content is missing", async () => {
+      const oldTransfer = await request(app).post("/transfer").send(oldForm);
+
+      const newTransfer = {
+        ...oldTransfer.body.transfer,
+        ...newForm,
+      };
+
+      const res1 = await request(app).put("/transfer").send({
+        new: newTransfer,
+      });
+      const res2 = await request(app).put("/transfer").send({
+        old: oldTransfer.body.income,
+      });
+
+      expect(res1.statusCode).toEqual(422);
+      expect(res2.statusCode).toEqual(422);
+    });
+
+    test("should respond with status 422 - req.body.new content is missing", async () => {
+      const oldTransfer = await request(app).post("/transfer").send(oldForm);
+
+      for (let key in newForm) {
+        const newTransfer = {
+          ...oldTransfer.body.transfer,
+          ...newForm,
+        };
+        delete newTransfer[key];
+
+        const response = await request(app).put("/transfer").send({
+          old: oldTransfer.body.transfer,
+          new: newTransfer,
+        });
+
+        expect(response.statusCode).toEqual(422);
+      }
+    });
+
+    test("should respond with status 422 - req.body.old content is missing", async () => {
+      const transfer = await request(app).post("/transfer").send(oldForm);
+
+      const newTransfer = {
+        ...transfer.body.transfer,
+        ...newForm,
+      };
+
+      for (let key in transfer.body.transfer) {
+        if (key !== "updatedAt" && key !== "createdAt") {
+          const oldTransfer = {
+            ...transfer.body.transfer,
+          };
+          delete oldTransfer[key];
+          console.log(oldTransfer);
+
+          const response = await request(app).put("/transfer").send({
+            old: oldTransfer,
+            new: newTransfer,
+          });
+
+          expect(response.statusCode).toEqual(422);
+        }
+      }
     });
   });
 });
