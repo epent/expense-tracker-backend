@@ -205,19 +205,20 @@ describe("PUT /expense", () => {
 });
 
 describe("PUT /income", () => {
+  const oldForm = {
+    Amount: 100,
+    Date: new Date(),
+    From: "Salary",
+    To: "Bank",
+  };
+
+  const newForm = {
+    amount: 500,
+    from: "Other income",
+    to: "Visa",
+  };
+
   describe("positive tests", () => {
-    const oldForm = {
-      Amount: 100,
-      Date: new Date(),
-      From: "Salary",
-      To: "Bank",
-    };
-
-    const newForm = {
-      amount: 500,
-      to: "Visa",
-    };
-
     test("should respond with status 200", async () => {
       const oldIncome = await request(app).post("/income").send(oldForm);
 
@@ -305,6 +306,71 @@ describe("PUT /income", () => {
 
       expect(res.dataValues.amount).toEqual(newForm.amount);
       expect(res.dataValues.accountName).toEqual(newForm.to);
+    });
+  });
+
+  describe("negative tests", () => {
+    test("should respond with status 422 - req.body content is missing", async () => {
+      const oldIncome = await request(app).post("/income").send(oldForm);
+
+      const newIncome = {
+        ...oldIncome.body.income,
+        ...newForm,
+      };
+
+      const res1 = await request(app).put("/income").send({
+        new: newIncome,
+      });
+      const res2 = await request(app).put("/income").send({
+        old: oldIncome.body.income,
+      });
+
+      expect(res1.statusCode).toEqual(422);
+      expect(res2.statusCode).toEqual(422);
+    });
+
+    test("should respond with status 422 - req.body.new content is missing", async () => {
+      const oldIncome = await request(app).post("/income").send(oldForm);
+
+      for (let key in newForm) {
+        const newIncome = {
+          ...oldIncome.body.income,
+          ...newForm,
+        };
+        delete newIncome[key];
+
+        const response = await request(app).put("/income").send({
+          old: oldIncome.body.income,
+          new: newIncome,
+        });
+
+        expect(response.statusCode).toEqual(422);
+      }
+    });
+
+    test("should respond with status 422 - req.body.old content is missing", async () => {
+      const income = await request(app).post("/income").send(oldForm);
+
+      const newIncome = {
+        ...income.body.income,
+        ...newForm,
+      };
+
+      for (let key in income.body.income) {
+        if (key !== "updatedAt" && key !== "createdAt") {
+          const oldIncome = {
+            ...income.body.income,
+          };
+          delete oldIncome[key];
+
+          const response = await request(app).put("/income").send({
+            old: oldIncome,
+            new: newIncome,
+          });
+
+          expect(response.statusCode).toEqual(422);
+        }
+      }
     });
   });
 });
