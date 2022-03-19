@@ -374,6 +374,34 @@ exports.updateExpense = async (req, res, next) => {
 
 exports.updateIncome = async (req, res, next) => {
   try {
+    if (!req.body.old || !req.body.new) {
+      const error = new Error("req.body content is missing");
+      error.statusCode = 422;
+      throw error;
+    }
+    if (
+      !req.body.new.hasOwnProperty("id") ||
+      !req.body.new.hasOwnProperty("from") ||
+      !req.body.new.hasOwnProperty("to") ||
+      !req.body.new.hasOwnProperty("amount") ||
+      !req.body.new.hasOwnProperty("date")
+    ) {
+      const error = new Error("req.body.new content is missing");
+      error.statusCode = 422;
+      throw error;
+    }
+    if (
+      !req.body.old.hasOwnProperty("id") ||
+      !req.body.old.hasOwnProperty("from") ||
+      !req.body.old.hasOwnProperty("accountName") ||
+      !req.body.old.hasOwnProperty("amount") ||
+      !req.body.old.hasOwnProperty("date")
+    ) {
+      const error = new Error("req.body.old content is missing");
+      error.statusCode = 422;
+      throw error;
+    }
+
     const oldIncome = req.body.old;
     const newIncome = req.body.new;
 
