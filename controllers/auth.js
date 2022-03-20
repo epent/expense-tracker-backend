@@ -1,4 +1,5 @@
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 const db = require("../db/models");
 const User = db.user;
@@ -30,6 +31,15 @@ exports.signup = async (req, res, next) => {
       email: email,
       password: hashedPassword,
     });
+
+    // const token = jwt.sign(
+    //   {
+    //     email: email,
+    //     userId: user.dataValues.id,
+    //   },
+    //   "f7AfW2hvZfUEP24S6xL5Dv27j94e4JPx",
+    //   { expiresIn: "1h" }
+    // );
 
     res.status(201).json({ user: user });
   } catch (error) {
@@ -64,6 +74,15 @@ exports.login = async (req, res, next) => {
       error.statusCode = 401;
       throw error;
     }
+
+    // const token = jwt.sign(
+    //   {
+    //     email: req.body.Email,
+    //     userId: user.dataValues.id,
+    //   },
+    //   "f7AfW2hvZfUEP24S6xL5Dv27j94e4JPx",
+    //   { expiresIn: "1h" }
+    // );
 
     res.status(200).json({ user: user });
   } catch (error) {
