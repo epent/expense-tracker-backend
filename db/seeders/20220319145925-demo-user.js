@@ -16,6 +16,16 @@ module.exports = {
           createdAt: new Date(),
           updatedAt: new Date(),
         },
+        {
+          id: uuidv4(),
+          firstName: "Unique",
+          lastName: "User",
+          email: "unique@user.com",
+          password:
+            "$2b$10$eYwDDbQ5sx2NiRlBcyfGxOjZ6GJMNifsVs3syAPX2iqDvzEdBlxfy",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
       ],
       {}
     );
