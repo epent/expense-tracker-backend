@@ -27,6 +27,12 @@ app.use(accountcategoryRoutes);
 app.use(homeRoutes);
 app.use(authRoutes);
 
+app.use((error, req, res, next) => {
+  const status = error.statusCode || 500;
+  const message = error.message;
+  res.status(status).json({ message: message, status: status });
+});
+
 db.sequelize.sync().catch((err) => {
   console.error("Unable to connect to the database:", err);
 });
