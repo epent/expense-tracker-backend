@@ -5,6 +5,18 @@ const User = db.user;
 
 exports.signup = async (req, res, next) => {
   try {
+    const userExists = await User.findOne({
+      where: {
+        email: req.body.Email,
+      },
+    });
+
+    if (userExists) {
+      const error = new Error("User exists");
+      error.statusCode = 422;
+      throw error;
+    }
+
     const firstName = req.body.FirstName;
     const lastName = req.body.LastName;
     const email = req.body.Email;
@@ -36,12 +48,24 @@ exports.login = async (req, res, next) => {
       },
     });
 
+    if (!user) {
+      const error = new Error("Wrong email");
+      error.statusCode = 401;
+      throw error;
+    }
+
     const isEqual = await bcrypt.compare(
       req.body.Password,
       user.dataValues.password
     );
 
-    res.status(200).json(user);
+    if (!isEqual) {
+      const error = new Error("Wrong password");
+      error.statusCode = 401;
+      throw error;
+    }
+
+    res.status(200).json({ user: user });
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
