@@ -1,31 +1,32 @@
 const express = require("express");
 
 const transactionController = require("../controllers/transaction");
+const verifyToken = require("../middleware/verify_token");
 
 const router = express.Router();
 
-router.post("/expense", transactionController.postExpense);
+router.post("/expense", verifyToken, transactionController.postExpense);
 
-router.post("/income", transactionController.postIncome);
+router.post("/income", verifyToken, transactionController.postIncome);
 
-router.post("/transfer", transactionController.postTransfer);
+router.post("/transfer", verifyToken, transactionController.postTransfer);
 
-router.get("/expenses", transactionController.getExpenses);
+router.get("/expenses", verifyToken, transactionController.getExpenses);
 
-router.get("/incomes", transactionController.getIncomes);
+router.get("/incomes", verifyToken, transactionController.getIncomes);
 
-router.get("/transfers", transactionController.getTransfers);
+router.get("/transfers", verifyToken, transactionController.getTransfers);
 
-router.delete("/expense", transactionController.deleteExpense);
+router.delete("/expense", verifyToken, transactionController.deleteExpense);
 
-router.delete("/income", transactionController.deleteIncome);
+router.delete("/income", verifyToken, transactionController.deleteIncome);
 
-router.delete("/transfer", transactionController.deleteTransfer);
+router.delete("/transfer", verifyToken, transactionController.deleteTransfer);
 
-router.put("/expense", transactionController.updateExpense);
+router.put("/expense", verifyToken, transactionController.updateExpense);
 
-router.put("/income", transactionController.updateIncome);
+router.put("/income", verifyToken, transactionController.updateIncome);
 
-router.put("/transfer", transactionController.updateTransfer);
+router.put("/transfer", verifyToken, transactionController.updateTransfer);
 
 module.exports = router;
