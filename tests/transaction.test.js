@@ -4,17 +4,34 @@ const db = require("../db/models");
 const app = require("../app");
 
 describe("GET /expenses", () => {
+  let token;
+  beforeAll(async () => {
+    const res = await request(app).post("/login").send({
+      Email: "unique@user.com",
+      Password: "1234567",
+    });
+    token = res.body.token;
+  });
+
   describe("positive tests", () => {
     test("should respond with status 200", async () => {
-      await request(app).get("/expenses").expect(200);
+      await request(app)
+        .get("/expenses")
+        .set("Authorization", `Bearer ${token}`)
+        .expect(200);
     });
 
     test("should respond with json type", async () => {
-      await request(app).get("/expenses").expect("Content-Type", /json/);
+      await request(app)
+        .get("/expenses")
+        .set("Authorization", `Bearer ${token}`)
+        .expect("Content-Type", /json/);
     });
 
     test("should respond with 0 expenses", async () => {
-      const res = await request(app).get("/expenses");
+      const res = await request(app)
+        .get("/expenses")
+        .set("Authorization", `Bearer ${token}`);
 
       expect(res.body.length).toBe(0);
     });
@@ -22,17 +39,34 @@ describe("GET /expenses", () => {
 });
 
 describe("GET /incomes", () => {
+  let token;
+  beforeAll(async () => {
+    const res = await request(app).post("/login").send({
+      Email: "unique@user.com",
+      Password: "1234567",
+    });
+    token = res.body.token;
+  });
+
   describe("positive tests", () => {
     test("should respond with status 200", async () => {
-      await request(app).get("/incomes").expect(200);
+      await request(app)
+        .get("/incomes")
+        .set("Authorization", `Bearer ${token}`)
+        .expect(200);
     });
 
     test("should respond with json type", async () => {
-      await request(app).get("/incomes").expect("Content-Type", /json/);
+      await request(app)
+        .get("/incomes")
+        .set("Authorization", `Bearer ${token}`)
+        .expect("Content-Type", /json/);
     });
 
     test("should respond with 0 expenses", async () => {
-      const res = await request(app).get("/incomes");
+      const res = await request(app)
+        .get("/incomes")
+        .set("Authorization", `Bearer ${token}`);
 
       expect(res.body.length).toBe(0);
     });
@@ -40,17 +74,34 @@ describe("GET /incomes", () => {
 });
 
 describe("GET /transfers", () => {
+  let token;
+  beforeAll(async () => {
+    const res = await request(app).post("/login").send({
+      Email: "unique@user.com",
+      Password: "1234567",
+    });
+    token = res.body.token;
+  });
+
   describe("positive tests", () => {
     test("should respond with status 200", async () => {
-      await request(app).get("/transfers").expect(200);
+      await request(app)
+        .get("/transfers")
+        .set("Authorization", `Bearer ${token}`)
+        .expect(200);
     });
 
     test("should respond with json type", async () => {
-      await request(app).get("/transfers").expect("Content-Type", /json/);
+      await request(app)
+        .get("/transfers")
+        .set("Authorization", `Bearer ${token}`)
+        .expect("Content-Type", /json/);
     });
 
     test("should respond with 0 expenses", async () => {
-      const res = await request(app).get("/transfers");
+      const res = await request(app)
+        .get("/transfers")
+        .set("Authorization", `Bearer ${token}`);
 
       expect(res.body.length).toBe(0);
     });
@@ -58,6 +109,15 @@ describe("GET /transfers", () => {
 });
 
 describe("POST /expense", () => {
+  let token;
+  beforeAll(async () => {
+    const res = await request(app).post("/login").send({
+      Email: "unique@user.com",
+      Password: "1234567",
+    });
+    token = res.body.token;
+  });
+
   describe("positive tests", () => {
     const req = {
       Amount: 10,
@@ -67,28 +127,45 @@ describe("POST /expense", () => {
     };
 
     test("should respond with status 201, expense body", async () => {
-      const res = await request(app).post("/expense").send(req);
+      const res = await request(app)
+        .post("/expense")
+        .set("Authorization", `Bearer ${token}`)
+        .send(req);
 
       expect(res.statusCode).toEqual(201);
       expect(res.body).toHaveProperty("expense");
     });
 
     test("should increase expenses length", async () => {
-      const before = await request(app).get("/expenses");
+      const before = await request(app)
+        .get("/expenses")
+        .set("Authorization", `Bearer ${token}`);
 
-      await request(app).post("/expense").send(req);
+      await request(app)
+        .post("/expense")
+        .set("Authorization", `Bearer ${token}`)
+        .send(req);
 
-      const after = await request(app).get("/expenses");
+      const after = await request(app)
+        .get("/expenses")
+        .set("Authorization", `Bearer ${token}`);
 
       expect(after.body.length).toBe(before.body.length + 1);
     });
 
     test("should update total and expenses Balance", async () => {
-      const before = await request(app).get("/balances");
+      const before = await request(app)
+        .get("/balances")
+        .set("Authorization", `Bearer ${token}`);
 
-      await request(app).post("/expense").send(req);
+      await request(app)
+        .post("/expense")
+        .set("Authorization", `Bearer ${token}`)
+        .send(req);
 
-      const after = await request(app).get("/balances");
+      const after = await request(app)
+        .get("/balances")
+        .set("Authorization", `Bearer ${token}`);
 
       expect(after.body.total).toBe(before.body.total - req.Amount);
       expect(after.body.expenses).toBe(before.body.expenses + req.Amount);
@@ -97,7 +174,10 @@ describe("POST /expense", () => {
     test("should update Account balance", async () => {
       const before = await db.account.findByPk(req.From);
 
-      await request(app).post("/expense").send(req);
+      await request(app)
+        .post("/expense")
+        .set("Authorization", `Bearer ${token}`)
+        .send(req);
 
       const after = await db.account.findByPk(req.From);
 
@@ -109,7 +189,10 @@ describe("POST /expense", () => {
     test("should update Category balance", async () => {
       const before = await db.category.findByPk(req.To);
 
-      await request(app).post("/expense").send(req);
+      await request(app)
+        .post("/expense")
+        .set("Authorization", `Bearer ${token}`)
+        .send(req);
 
       const after = await db.category.findByPk(req.To);
 
@@ -121,22 +204,28 @@ describe("POST /expense", () => {
 
   describe("negative tests", () => {
     test("should respond with status 422 - input is empty string", async () => {
-      const res = await request(app).post("/expense").send({
-        Amount: 10,
-        Date: new Date(),
-        From: "",
-        To: "Food",
-      });
+      const res = await request(app)
+        .post("/expense")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          Amount: 10,
+          Date: new Date(),
+          From: "",
+          To: "Food",
+        });
 
       expect(res.statusCode).toEqual(422);
     });
 
     test("should respond with status 422 - input is missing", async () => {
-      const res = await request(app).post("/expense").send({
-        Amount: 10,
-        Date: new Date(),
-        From: "Visa",
-      });
+      const res = await request(app)
+        .post("/expense")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          Amount: 10,
+          Date: new Date(),
+          From: "Visa",
+        });
 
       expect(res.statusCode).toEqual(422);
     });
@@ -144,6 +233,15 @@ describe("POST /expense", () => {
 });
 
 describe("POST /income", () => {
+  let token;
+  beforeAll(async () => {
+    const res = await request(app).post("/login").send({
+      Email: "unique@user.com",
+      Password: "1234567",
+    });
+    token = res.body.token;
+  });
+
   describe("positive tests", () => {
     const req = {
       Amount: 100,
@@ -153,27 +251,44 @@ describe("POST /income", () => {
     };
 
     test("should respond with status 201, income body", async () => {
-      const res = await request(app).post("/income").send(req);
+      const res = await request(app)
+        .post("/income")
+        .set("Authorization", `Bearer ${token}`)
+        .send(req);
       expect(res.statusCode).toEqual(201);
       expect(res.body).toHaveProperty("income");
     });
 
     test("should increase incomes length", async () => {
-      const before = await request(app).get("/incomes");
+      const before = await request(app)
+        .get("/incomes")
+        .set("Authorization", `Bearer ${token}`);
 
-      await request(app).post("/income").send(req);
+      await request(app)
+        .post("/income")
+        .set("Authorization", `Bearer ${token}`)
+        .send(req);
 
-      const after = await request(app).get("/incomes");
+      const after = await request(app)
+        .get("/incomes")
+        .set("Authorization", `Bearer ${token}`);
 
       expect(after.body.length).toBe(before.body.length + 1);
     });
 
     test("should update total and income Balance", async () => {
-      const before = await request(app).get("/balances");
+      const before = await request(app)
+        .get("/balances")
+        .set("Authorization", `Bearer ${token}`);
 
-      await request(app).post("/income").send(req);
+      await request(app)
+        .post("/income")
+        .set("Authorization", `Bearer ${token}`)
+        .send(req);
 
-      const after = await request(app).get("/balances");
+      const after = await request(app)
+        .get("/balances")
+        .set("Authorization", `Bearer ${token}`);
 
       expect(after.body.total).toBe(before.body.total + req.Amount);
       expect(after.body.income).toBe(before.body.income + req.Amount);
@@ -182,7 +297,10 @@ describe("POST /income", () => {
     test("should update Account balance", async () => {
       const before = await db.account.findByPk(req.To);
 
-      await request(app).post("/income").send(req);
+      await request(app)
+        .post("/income")
+        .set("Authorization", `Bearer ${token}`)
+        .send(req);
 
       const after = await db.account.findByPk(req.To);
 
@@ -194,22 +312,28 @@ describe("POST /income", () => {
 
   describe("negative tests", () => {
     test("should respond with status 422 - input is empty string", async () => {
-      const res = await request(app).post("/income").send({
-        Amount: "",
-        Date: new Date(),
-        From: "Salary",
-        To: "Bank",
-      });
+      const res = await request(app)
+        .post("/income")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          Amount: "",
+          Date: new Date(),
+          From: "Salary",
+          To: "Bank",
+        });
 
       expect(res.statusCode).toEqual(422);
     });
 
     test("should respond with status 422 - input is missing", async () => {
-      const res = await request(app).post("/income").send({
-        Amount: 100,
-        Date: new Date(),
-        To: "Bank",
-      });
+      const res = await request(app)
+        .post("/income")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          Amount: 100,
+          Date: new Date(),
+          To: "Bank",
+        });
 
       expect(res.statusCode).toEqual(422);
     });
@@ -217,6 +341,15 @@ describe("POST /income", () => {
 });
 
 describe("POST /transfer", () => {
+  let token;
+  beforeAll(async () => {
+    const res = await request(app).post("/login").send({
+      Email: "unique@user.com",
+      Password: "1234567",
+    });
+    token = res.body.token;
+  });
+
   describe("positive tests", () => {
     const req = {
       Amount: 100,
@@ -226,18 +359,28 @@ describe("POST /transfer", () => {
     };
 
     test("should respond with status 201, transfer body", async () => {
-      const res = await request(app).post("/transfer").send(req);
+      const res = await request(app)
+        .post("/transfer")
+        .set("Authorization", `Bearer ${token}`)
+        .send(req);
 
       expect(res.statusCode).toEqual(201);
       expect(res.body).toHaveProperty("transfer");
     });
 
     test("should increase transfers length", async () => {
-      const before = await request(app).get("/transfers");
+      const before = await request(app)
+        .get("/transfers")
+        .set("Authorization", `Bearer ${token}`);
 
-      await request(app).post("/transfer").send(req);
+      await request(app)
+        .post("/transfer")
+        .set("Authorization", `Bearer ${token}`)
+        .send(req);
 
-      const after = await request(app).get("/transfers");
+      const after = await request(app)
+        .get("/transfers")
+        .set("Authorization", `Bearer ${token}`);
 
       expect(after.body.length).toBe(before.body.length + 1);
     });
@@ -245,7 +388,10 @@ describe("POST /transfer", () => {
     test("should update AccountFrom balance", async () => {
       const before = await db.account.findByPk(req.From);
 
-      await request(app).post("/transfer").send(req);
+      await request(app)
+        .post("/transfer")
+        .set("Authorization", `Bearer ${token}`)
+        .send(req);
 
       const after = await db.account.findByPk(req.From);
 
@@ -257,7 +403,10 @@ describe("POST /transfer", () => {
     test("should update AccountTo balance", async () => {
       const before = await db.account.findByPk(req.To);
 
-      await request(app).post("/transfer").send(req);
+      await request(app)
+        .post("/transfer")
+        .set("Authorization", `Bearer ${token}`)
+        .send(req);
 
       const after = await db.account.findByPk(req.To);
 
@@ -269,22 +418,28 @@ describe("POST /transfer", () => {
 
   describe("negative tests", () => {
     test("should respond with status 422 - input is empty string", async () => {
-      const res = await request(app).post("/transfer").send({
-        Amount: 100,
-        Date: "",
-        From: "Bank",
-        To: "Visa",
-      });
+      const res = await request(app)
+        .post("/transfer")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          Amount: 100,
+          Date: "",
+          From: "Bank",
+          To: "Visa",
+        });
 
       expect(res.statusCode).toEqual(422);
     });
 
     test("should respond with status 422 - input is missing", async () => {
-      const res = await request(app).post("/transfer").send({
-        Date: new Date(),
-        From: "Bank",
-        To: "Visa",
-      });
+      const res = await request(app)
+        .post("/transfer")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          Date: new Date(),
+          From: "Bank",
+          To: "Visa",
+        });
 
       expect(res.statusCode).toEqual(422);
     });
@@ -298,37 +453,70 @@ describe("DELETE /expense", () => {
     From: "Visa",
     To: "Food",
   };
+  let token;
+  beforeAll(async () => {
+    const res = await request(app).post("/login").send({
+      Email: "unique@user.com",
+      Password: "1234567",
+    });
+    token = res.body.token;
+  });
+
   describe("positive tests", () => {
     test("should respond with status 204", async () => {
-      const expense = await request(app).post("/expense").send(req);
+      const expense = await request(app)
+        .post("/expense")
+        .set("Authorization", `Bearer ${token}`)
+        .send(req);
 
       const res = await request(app)
         .delete("/expense")
+        .set("Authorization", `Bearer ${token}`)
         .send(expense.body.expense);
 
       expect(res.statusCode).toEqual(204);
     });
 
     test("should decrease expenses length", async () => {
-      const expense = await request(app).post("/expense").send(req);
+      const expense = await request(app)
+        .post("/expense")
+        .set("Authorization", `Bearer ${token}`)
+        .send(req);
 
-      const before = await request(app).get("/expenses");
+      const before = await request(app)
+        .get("/expenses")
+        .set("Authorization", `Bearer ${token}`);
 
-      await request(app).delete("/expense").send(expense.body.expense);
+      await request(app)
+        .delete("/expense")
+        .set("Authorization", `Bearer ${token}`)
+        .send(expense.body.expense);
 
-      const after = await request(app).get("/expenses");
+      const after = await request(app)
+        .get("/expenses")
+        .set("Authorization", `Bearer ${token}`);
 
       expect(after.body.length).toBe(before.body.length - 1);
     });
 
     test("should update total and expenses Balance", async () => {
-      const expense = await request(app).post("/expense").send(req);
+      const expense = await request(app)
+        .post("/expense")
+        .set("Authorization", `Bearer ${token}`)
+        .send(req);
 
-      const before = await request(app).get("/balances");
+      const before = await request(app)
+        .get("/balances")
+        .set("Authorization", `Bearer ${token}`);
 
-      await request(app).delete("/expense").send(expense.body.expense);
+      await request(app)
+        .delete("/expense")
+        .set("Authorization", `Bearer ${token}`)
+        .send(expense.body.expense);
 
-      const after = await request(app).get("/balances");
+      const after = await request(app)
+        .get("/balances")
+        .set("Authorization", `Bearer ${token}`);
 
       expect(after.body.total).toBe(
         before.body.total + expense.body.expense.amount
@@ -339,11 +527,17 @@ describe("DELETE /expense", () => {
     });
 
     test("should update Account balance", async () => {
-      const expense = await request(app).post("/expense").send(req);
+      const expense = await request(app)
+        .post("/expense")
+        .set("Authorization", `Bearer ${token}`)
+        .send(req);
 
       const before = await db.account.findByPk(req.From);
 
-      await request(app).delete("/expense").send(expense.body.expense);
+      await request(app)
+        .delete("/expense")
+        .set("Authorization", `Bearer ${token}`)
+        .send(expense.body.expense);
 
       const after = await db.account.findByPk(req.From);
 
@@ -353,11 +547,17 @@ describe("DELETE /expense", () => {
     });
 
     test("should update Category balance", async () => {
-      const expense = await request(app).post("/expense").send(req);
+      const expense = await request(app)
+        .post("/expense")
+        .set("Authorization", `Bearer ${token}`)
+        .send(req);
 
       const before = await db.category.findByPk(req.To);
 
-      await request(app).delete("/expense").send(expense.body.expense);
+      await request(app)
+        .delete("/expense")
+        .set("Authorization", `Bearer ${token}`)
+        .send(expense.body.expense);
 
       const after = await db.category.findByPk(req.To);
 
@@ -369,9 +569,15 @@ describe("DELETE /expense", () => {
 
   describe("negative tests", () => {
     test("should fail to find the expense by id", async () => {
-      const expense = await request(app).post("/expense").send(req);
+      const expense = await request(app)
+        .post("/expense")
+        .set("Authorization", `Bearer ${token}`)
+        .send(req);
 
-      await request(app).delete("/expense").send(expense.body.expense);
+      await request(app)
+        .delete("/expense")
+        .set("Authorization", `Bearer ${token}`)
+        .send(expense.body.expense);
 
       const res = await db.expense.findByPk(expense.body.expense.id);
 
@@ -388,35 +594,70 @@ describe("DELETE /income", () => {
     To: "Bank",
   };
 
+  let token;
+  beforeAll(async () => {
+    const res = await request(app).post("/login").send({
+      Email: "unique@user.com",
+      Password: "1234567",
+    });
+    token = res.body.token;
+  });
+
   describe("positive tests", () => {
     test("should respond with status 204", async () => {
-      const income = await request(app).post("/income").send(req);
+      const income = await request(app)
+        .post("/income")
+        .set("Authorization", `Bearer ${token}`)
+        .send(req);
 
-      const res = await request(app).delete("/income").send(income.body.income);
+      const res = await request(app)
+        .delete("/income")
+        .set("Authorization", `Bearer ${token}`)
+        .send(income.body.income);
 
       expect(res.statusCode).toEqual(204);
     });
 
     test("should decrease incomes length", async () => {
-      const income = await request(app).post("/income").send(req);
+      const income = await request(app)
+        .post("/income")
+        .set("Authorization", `Bearer ${token}`)
+        .send(req);
 
-      const before = await request(app).get("/incomes");
+      const before = await request(app)
+        .get("/incomes")
+        .set("Authorization", `Bearer ${token}`);
 
-      await request(app).delete("/income").send(income.body.income);
+      await request(app)
+        .delete("/income")
+        .set("Authorization", `Bearer ${token}`)
+        .send(income.body.income);
 
-      const after = await request(app).get("/incomes");
+      const after = await request(app)
+        .get("/incomes")
+        .set("Authorization", `Bearer ${token}`);
 
       expect(after.body.length).toBe(before.body.length - 1);
     });
 
     test("should update total and income Balance", async () => {
-      const income = await request(app).post("/income").send(req);
+      const income = await request(app)
+        .post("/income")
+        .set("Authorization", `Bearer ${token}`)
+        .send(req);
 
-      const before = await request(app).get("/balances");
+      const before = await request(app)
+        .get("/balances")
+        .set("Authorization", `Bearer ${token}`);
 
-      await request(app).delete("/income").send(income.body.income);
+      await request(app)
+        .delete("/income")
+        .set("Authorization", `Bearer ${token}`)
+        .send(income.body.income);
 
-      const after = await request(app).get("/balances");
+      const after = await request(app)
+        .get("/balances")
+        .set("Authorization", `Bearer ${token}`);
 
       expect(after.body.total).toBe(
         before.body.total - income.body.income.amount
@@ -427,11 +668,17 @@ describe("DELETE /income", () => {
     });
 
     test("should update Account balance", async () => {
-      const income = await request(app).post("/income").send(req);
+      const income = await request(app)
+        .post("/income")
+        .set("Authorization", `Bearer ${token}`)
+        .send(req);
 
       const before = await db.account.findByPk(req.To);
 
-      await request(app).delete("/income").send(income.body.income);
+      await request(app)
+        .delete("/income")
+        .set("Authorization", `Bearer ${token}`)
+        .send(income.body.income);
 
       const after = await db.account.findByPk(req.To);
 
@@ -443,9 +690,15 @@ describe("DELETE /income", () => {
 
   describe("negative tests", () => {
     test("should fail to find the income by id", async () => {
-      const income = await request(app).post("/income").send(req);
+      const income = await request(app)
+        .post("/income")
+        .set("Authorization", `Bearer ${token}`)
+        .send(req);
 
-      await request(app).delete("/income").send(income.body.income);
+      await request(app)
+        .delete("/income")
+        .set("Authorization", `Bearer ${token}`)
+        .send(income.body.income);
 
       const res = await db.income.findByPk(income.body.income.id);
 
@@ -462,35 +715,64 @@ describe("DELETE /transfer", () => {
     To: "Visa",
   };
 
+  let token;
+  beforeAll(async () => {
+    const res = await request(app).post("/login").send({
+      Email: "unique@user.com",
+      Password: "1234567",
+    });
+    token = res.body.token;
+  });
+
   describe("positive tests", () => {
     test("should respond with status 204", async () => {
-      const transfer = await request(app).post("/transfer").send(req);
+      const transfer = await request(app)
+        .post("/transfer")
+        .set("Authorization", `Bearer ${token}`)
+        .send(req);
 
       const res = await request(app)
         .delete("/transfer")
+        .set("Authorization", `Bearer ${token}`)
         .send(transfer.body.transfer);
 
       expect(res.statusCode).toEqual(204);
     });
 
     test("should decrease transfers length", async () => {
-      const transfer = await request(app).post("/transfer").send(req);
+      const transfer = await request(app)
+        .post("/transfer")
+        .set("Authorization", `Bearer ${token}`)
+        .send(req);
 
-      const before = await request(app).get("/transfers");
+      const before = await request(app)
+        .get("/transfers")
+        .set("Authorization", `Bearer ${token}`);
 
-      await request(app).delete("/transfer").send(transfer.body.transfer);
+      await request(app)
+        .delete("/transfer")
+        .set("Authorization", `Bearer ${token}`)
+        .send(transfer.body.transfer);
 
-      const after = await request(app).get("/transfers");
+      const after = await request(app)
+        .get("/transfers")
+        .set("Authorization", `Bearer ${token}`);
 
       expect(after.body.length).toBe(before.body.length - 1);
     });
 
     test("should update AccountFrom balance", async () => {
-      const transfer = await request(app).post("/transfer").send(req);
+      const transfer = await request(app)
+        .post("/transfer")
+        .set("Authorization", `Bearer ${token}`)
+        .send(req);
 
       const before = await db.account.findByPk(req.From);
 
-      await request(app).delete("/transfer").send(transfer.body.transfer);
+      await request(app)
+        .delete("/transfer")
+        .set("Authorization", `Bearer ${token}`)
+        .send(transfer.body.transfer);
 
       const after = await db.account.findByPk(req.From);
 
@@ -500,11 +782,17 @@ describe("DELETE /transfer", () => {
     });
 
     test("should update AccountTo balance", async () => {
-      const transfer = await request(app).post("/transfer").send(req);
+      const transfer = await request(app)
+        .post("/transfer")
+        .set("Authorization", `Bearer ${token}`)
+        .send(req);
 
       const before = await db.account.findByPk(req.To);
 
-      await request(app).delete("/transfer").send(transfer.body.transfer);
+      await request(app)
+        .delete("/transfer")
+        .set("Authorization", `Bearer ${token}`)
+        .send(transfer.body.transfer);
 
       const after = await db.account.findByPk(req.To);
 
@@ -516,9 +804,15 @@ describe("DELETE /transfer", () => {
 
   describe("negative tests", () => {
     test("should fail to find the transfer by id", async () => {
-      const transfer = await request(app).post("/transfer").send(req);
+      const transfer = await request(app)
+        .post("/transfer")
+        .set("Authorization", `Bearer ${token}`)
+        .send(req);
 
-      await request(app).delete("/transfer").send(transfer.body.transfer);
+      await request(app)
+        .delete("/transfer")
+        .set("Authorization", `Bearer ${token}`)
+        .send(transfer.body.transfer);
 
       const res = await db.transfer.findByPk(transfer.body.transfer.id);
 

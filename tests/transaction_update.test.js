@@ -16,39 +16,65 @@ describe("PUT /expense", () => {
     from: "Bank",
     to: "Other",
   };
+
+  let token;
+  beforeAll(async () => {
+    const res = await request(app).post("/login").send({
+      Email: "unique@user.com",
+      Password: "1234567",
+    });
+    token = res.body.token;
+  });
+
   describe("positive tests", () => {
     test("should respond with status 200", async () => {
-      const oldExpense = await request(app).post("/expense").send(oldForm);
+      const oldExpense = await request(app)
+        .post("/expense")
+        .set("Authorization", `Bearer ${token}`)
+        .send(oldForm);
 
       const newExpense = {
         ...oldExpense.body.expense,
         ...newForm,
       };
 
-      const res = await request(app).put("/expense").send({
-        old: oldExpense.body.expense,
-        new: newExpense,
-      });
+      const res = await request(app)
+        .put("/expense")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          old: oldExpense.body.expense,
+          new: newExpense,
+        });
 
       expect(res.statusCode).toEqual(200);
     });
 
     test("should update total and expenses Balance", async () => {
-      const oldExpense = await request(app).post("/expense").send(oldForm);
+      const oldExpense = await request(app)
+        .post("/expense")
+        .set("Authorization", `Bearer ${token}`)
+        .send(oldForm);
 
-      const before = await request(app).get("/balances");
+      const before = await request(app)
+        .get("/balances")
+        .set("Authorization", `Bearer ${token}`);
 
       const newExpense = {
         ...oldExpense.body.expense,
         ...newForm,
       };
 
-      await request(app).put("/expense").send({
-        old: oldExpense.body.expense,
-        new: newExpense,
-      });
+      await request(app)
+        .put("/expense")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          old: oldExpense.body.expense,
+          new: newExpense,
+        });
 
-      const after = await request(app).get("/balances");
+      const after = await request(app)
+        .get("/balances")
+        .set("Authorization", `Bearer ${token}`);
 
       expect(after.body.total).toBe(
         before.body.total + (oldExpense.body.expense.amount - newExpense.amount)
@@ -60,7 +86,10 @@ describe("PUT /expense", () => {
     });
 
     test("should update Account balance", async () => {
-      const oldExpense = await request(app).post("/expense").send(oldForm);
+      const oldExpense = await request(app)
+        .post("/expense")
+        .set("Authorization", `Bearer ${token}`)
+        .send(oldForm);
 
       const oldAccountBefore = await db.account.findByPk(oldForm.From);
 
@@ -71,10 +100,13 @@ describe("PUT /expense", () => {
         ...newForm,
       };
 
-      await request(app).put("/expense").send({
-        old: oldExpense.body.expense,
-        new: newExpense,
-      });
+      await request(app)
+        .put("/expense")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          old: oldExpense.body.expense,
+          new: newExpense,
+        });
 
       const oldAccountAfter = await db.account.findByPk(oldForm.From);
 
@@ -89,7 +121,10 @@ describe("PUT /expense", () => {
     });
 
     test("should update Category balance", async () => {
-      const oldExpense = await request(app).post("/expense").send(oldForm);
+      const oldExpense = await request(app)
+        .post("/expense")
+        .set("Authorization", `Bearer ${token}`)
+        .send(oldForm);
 
       const oldCategoryBefore = await db.category.findByPk(oldForm.To);
 
@@ -100,10 +135,13 @@ describe("PUT /expense", () => {
         ...newForm,
       };
 
-      await request(app).put("/expense").send({
-        old: oldExpense.body.expense,
-        new: newExpense,
-      });
+      await request(app)
+        .put("/expense")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          old: oldExpense.body.expense,
+          new: newExpense,
+        });
 
       const oldCategoryAfter = await db.category.findByPk(oldForm.To);
 
@@ -118,17 +156,23 @@ describe("PUT /expense", () => {
     });
 
     test("should respond with updated expense transaction", async () => {
-      const oldExpense = await request(app).post("/expense").send(oldForm);
+      const oldExpense = await request(app)
+        .post("/expense")
+        .set("Authorization", `Bearer ${token}`)
+        .send(oldForm);
 
       const newExpense = {
         ...oldExpense.body.expense,
         ...newForm,
       };
 
-      await request(app).put("/expense").send({
-        old: oldExpense.body.expense,
-        new: newExpense,
-      });
+      await request(app)
+        .put("/expense")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          old: oldExpense.body.expense,
+          new: newExpense,
+        });
 
       const res = await db.expense.findByPk(oldExpense.body.expense.id);
 
@@ -140,26 +184,38 @@ describe("PUT /expense", () => {
 
   describe("negative tests", () => {
     test("should respond with status 422 - req.body content is missing", async () => {
-      const oldExpense = await request(app).post("/expense").send(oldForm);
+      const oldExpense = await request(app)
+        .post("/expense")
+        .set("Authorization", `Bearer ${token}`)
+        .send(oldForm);
 
       const newExpense = {
         ...oldExpense.body.expense,
         ...newForm,
       };
 
-      const res1 = await request(app).put("/expense").send({
-        new: newExpense,
-      });
-      const res2 = await request(app).put("/expense").send({
-        old: oldExpense.body.expense,
-      });
+      const res1 = await request(app)
+        .put("/expense")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          new: newExpense,
+        });
+      const res2 = await request(app)
+        .put("/expense")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          old: oldExpense.body.expense,
+        });
 
       expect(res1.statusCode).toEqual(422);
       expect(res2.statusCode).toEqual(422);
     });
 
     test("should respond with status 422 - req.body.new content is missing", async () => {
-      const oldExpense = await request(app).post("/expense").send(oldForm);
+      const oldExpense = await request(app)
+        .post("/expense")
+        .set("Authorization", `Bearer ${token}`)
+        .send(oldForm);
 
       for (let key in newForm) {
         const newExpense = {
@@ -168,17 +224,23 @@ describe("PUT /expense", () => {
         };
         delete newExpense[key];
 
-        const response = await request(app).put("/expense").send({
-          old: oldExpense.body.expense,
-          new: newExpense,
-        });
+        const response = await request(app)
+          .put("/expense")
+          .set("Authorization", `Bearer ${token}`)
+          .send({
+            old: oldExpense.body.expense,
+            new: newExpense,
+          });
 
         expect(response.statusCode).toEqual(422);
       }
     });
 
     test("should respond with status 422 - req.body.old content is missing", async () => {
-      const expense = await request(app).post("/expense").send(oldForm);
+      const expense = await request(app)
+        .post("/expense")
+        .set("Authorization", `Bearer ${token}`)
+        .send(oldForm);
 
       const newExpense = {
         ...expense.body.expense,
@@ -192,10 +254,13 @@ describe("PUT /expense", () => {
           };
           delete oldExpense[key];
 
-          const response = await request(app).put("/expense").send({
-            old: oldExpense,
-            new: newExpense,
-          });
+          const response = await request(app)
+            .put("/expense")
+            .set("Authorization", `Bearer ${token}`)
+            .send({
+              old: oldExpense,
+              new: newExpense,
+            });
 
           expect(response.statusCode).toEqual(422);
         }
@@ -218,39 +283,64 @@ describe("PUT /income", () => {
     to: "Visa",
   };
 
+  let token;
+  beforeAll(async () => {
+    const res = await request(app).post("/login").send({
+      Email: "unique@user.com",
+      Password: "1234567",
+    });
+    token = res.body.token;
+  });
+
   describe("positive tests", () => {
     test("should respond with status 200", async () => {
-      const oldIncome = await request(app).post("/income").send(oldForm);
+      const oldIncome = await request(app)
+        .post("/income")
+        .set("Authorization", `Bearer ${token}`)
+        .send(oldForm);
 
       const newIncome = {
         ...oldIncome.body.income,
         ...newForm,
       };
 
-      const res = await request(app).put("/income").send({
-        old: oldIncome.body.income,
-        new: newIncome,
-      });
+      const res = await request(app)
+        .put("/income")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          old: oldIncome.body.income,
+          new: newIncome,
+        });
 
       expect(res.statusCode).toEqual(200);
     });
 
     test("should update total and income Balance", async () => {
-      const oldIncome = await request(app).post("/income").send(oldForm);
+      const oldIncome = await request(app)
+        .post("/income")
+        .set("Authorization", `Bearer ${token}`)
+        .send(oldForm);
 
-      const before = await request(app).get("/balances");
+      const before = await request(app)
+        .get("/balances")
+        .set("Authorization", `Bearer ${token}`);
 
       const newIncome = {
         ...oldIncome.body.income,
         ...newForm,
       };
 
-      await request(app).put("/income").send({
-        old: oldIncome.body.income,
-        new: newIncome,
-      });
+      await request(app)
+        .put("/income")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          old: oldIncome.body.income,
+          new: newIncome,
+        });
 
-      const after = await request(app).get("/balances");
+      const after = await request(app)
+        .get("/balances")
+        .set("Authorization", `Bearer ${token}`);
 
       expect(after.body.total).toBe(
         before.body.total + (newIncome.amount - oldIncome.body.income.amount)
@@ -261,7 +351,10 @@ describe("PUT /income", () => {
     });
 
     test("should update Account balance", async () => {
-      const oldIncome = await request(app).post("/income").send(oldForm);
+      const oldIncome = await request(app)
+        .post("/income")
+        .set("Authorization", `Bearer ${token}`)
+        .send(oldForm);
 
       const oldAccountBefore = await db.account.findByPk(oldForm.To);
 
@@ -272,10 +365,13 @@ describe("PUT /income", () => {
         ...newForm,
       };
 
-      await request(app).put("/income").send({
-        old: oldIncome.body.income,
-        new: newIncome,
-      });
+      await request(app)
+        .put("/income")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          old: oldIncome.body.income,
+          new: newIncome,
+        });
 
       const oldAccountAfter = await db.account.findByPk(oldForm.To);
 
@@ -290,17 +386,23 @@ describe("PUT /income", () => {
     });
 
     test("should respond with updated income transaction", async () => {
-      const oldIncome = await request(app).post("/income").send(oldForm);
+      const oldIncome = await request(app)
+        .post("/income")
+        .set("Authorization", `Bearer ${token}`)
+        .send(oldForm);
 
       const newIncome = {
         ...oldIncome.body.income,
         ...newForm,
       };
 
-      await request(app).put("/income").send({
-        old: oldIncome.body.income,
-        new: newIncome,
-      });
+      await request(app)
+        .put("/income")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          old: oldIncome.body.income,
+          new: newIncome,
+        });
 
       const res = await db.income.findByPk(oldIncome.body.income.id);
 
@@ -311,26 +413,38 @@ describe("PUT /income", () => {
 
   describe("negative tests", () => {
     test("should respond with status 422 - req.body content is missing", async () => {
-      const oldIncome = await request(app).post("/income").send(oldForm);
+      const oldIncome = await request(app)
+        .post("/income")
+        .set("Authorization", `Bearer ${token}`)
+        .send(oldForm);
 
       const newIncome = {
         ...oldIncome.body.income,
         ...newForm,
       };
 
-      const res1 = await request(app).put("/income").send({
-        new: newIncome,
-      });
-      const res2 = await request(app).put("/income").send({
-        old: oldIncome.body.income,
-      });
+      const res1 = await request(app)
+        .put("/income")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          new: newIncome,
+        });
+      const res2 = await request(app)
+        .put("/income")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          old: oldIncome.body.income,
+        });
 
       expect(res1.statusCode).toEqual(422);
       expect(res2.statusCode).toEqual(422);
     });
 
     test("should respond with status 422 - req.body.new content is missing", async () => {
-      const oldIncome = await request(app).post("/income").send(oldForm);
+      const oldIncome = await request(app)
+        .post("/income")
+        .set("Authorization", `Bearer ${token}`)
+        .send(oldForm);
 
       for (let key in newForm) {
         const newIncome = {
@@ -339,17 +453,23 @@ describe("PUT /income", () => {
         };
         delete newIncome[key];
 
-        const response = await request(app).put("/income").send({
-          old: oldIncome.body.income,
-          new: newIncome,
-        });
+        const response = await request(app)
+          .put("/income")
+          .set("Authorization", `Bearer ${token}`)
+          .send({
+            old: oldIncome.body.income,
+            new: newIncome,
+          });
 
         expect(response.statusCode).toEqual(422);
       }
     });
 
     test("should respond with status 422 - req.body.old content is missing", async () => {
-      const income = await request(app).post("/income").send(oldForm);
+      const income = await request(app)
+        .post("/income")
+        .set("Authorization", `Bearer ${token}`)
+        .send(oldForm);
 
       const newIncome = {
         ...income.body.income,
@@ -363,10 +483,13 @@ describe("PUT /income", () => {
           };
           delete oldIncome[key];
 
-          const response = await request(app).put("/income").send({
-            old: oldIncome,
-            new: newIncome,
-          });
+          const response = await request(app)
+            .put("/income")
+            .set("Authorization", `Bearer ${token}`)
+            .send({
+              old: oldIncome,
+              new: newIncome,
+            });
 
           expect(response.statusCode).toEqual(422);
         }
@@ -389,24 +512,42 @@ describe("PUT /transfer", () => {
     to: "Master card",
   };
 
+  let token;
+  beforeAll(async () => {
+    const res = await request(app).post("/login").send({
+      Email: "unique@user.com",
+      Password: "1234567",
+    });
+    token = res.body.token;
+  });
+
   describe("positive tests", () => {
     test("should respond with status 200", async () => {
-      const oldTransfer = await request(app).post("/transfer").send(oldForm);
+      const oldTransfer = await request(app)
+        .post("/transfer")
+        .set("Authorization", `Bearer ${token}`)
+        .send(oldForm);
 
       const newTransfer = {
         ...oldTransfer.body.transfer,
         ...newForm,
       };
-      const res = await request(app).put("/transfer").send({
-        old: oldTransfer.body.transfer,
-        new: newTransfer,
-      });
+      const res = await request(app)
+        .put("/transfer")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          old: oldTransfer.body.transfer,
+          new: newTransfer,
+        });
 
       expect(res.statusCode).toEqual(200);
     });
 
     test("should update AccountFrom balance", async () => {
-      const oldTransfer = await request(app).post("/transfer").send(oldForm);
+      const oldTransfer = await request(app)
+        .post("/transfer")
+        .set("Authorization", `Bearer ${token}`)
+        .send(oldForm);
 
       const oldAccountBefore = await db.account.findByPk(oldForm.From);
 
@@ -416,10 +557,13 @@ describe("PUT /transfer", () => {
         ...oldTransfer.body.transfer,
         ...newForm,
       };
-      await request(app).put("/transfer").send({
-        old: oldTransfer.body.transfer,
-        new: newTransfer,
-      });
+      await request(app)
+        .put("/transfer")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          old: oldTransfer.body.transfer,
+          new: newTransfer,
+        });
 
       const oldAccountAfter = await db.account.findByPk(oldForm.From);
 
@@ -434,7 +578,10 @@ describe("PUT /transfer", () => {
     });
 
     test("should update AccountTo balance", async () => {
-      const oldTransfer = await request(app).post("/transfer").send(oldForm);
+      const oldTransfer = await request(app)
+        .post("/transfer")
+        .set("Authorization", `Bearer ${token}`)
+        .send(oldForm);
 
       const oldAccountBefore = await db.account.findByPk(oldForm.To);
 
@@ -445,10 +592,13 @@ describe("PUT /transfer", () => {
         ...newForm,
       };
 
-      await request(app).put("/transfer").send({
-        old: oldTransfer.body.transfer,
-        new: newTransfer,
-      });
+      await request(app)
+        .put("/transfer")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          old: oldTransfer.body.transfer,
+          new: newTransfer,
+        });
 
       const oldAccountAfter = await db.account.findByPk(oldForm.To);
 
@@ -463,17 +613,23 @@ describe("PUT /transfer", () => {
     });
 
     test("should respond with updated transfer transaction", async () => {
-      const oldTransfer = await request(app).post("/transfer").send(oldForm);
+      const oldTransfer = await request(app)
+        .post("/transfer")
+        .set("Authorization", `Bearer ${token}`)
+        .send(oldForm);
 
       const newTransfer = {
         ...oldTransfer.body.transfer,
         ...newForm,
       };
 
-      await request(app).put("/transfer").send({
-        old: oldTransfer.body.transfer,
-        new: newTransfer,
-      });
+      await request(app)
+        .put("/transfer")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          old: oldTransfer.body.transfer,
+          new: newTransfer,
+        });
 
       const res = await db.transfer.findByPk(oldTransfer.body.transfer.id);
 
@@ -485,26 +641,38 @@ describe("PUT /transfer", () => {
 
   describe("negative tests", () => {
     test("should respond with status 422 - req.body content is missing", async () => {
-      const oldTransfer = await request(app).post("/transfer").send(oldForm);
+      const oldTransfer = await request(app)
+        .post("/transfer")
+        .set("Authorization", `Bearer ${token}`)
+        .send(oldForm);
 
       const newTransfer = {
         ...oldTransfer.body.transfer,
         ...newForm,
       };
 
-      const res1 = await request(app).put("/transfer").send({
-        new: newTransfer,
-      });
-      const res2 = await request(app).put("/transfer").send({
-        old: oldTransfer.body.income,
-      });
+      const res1 = await request(app)
+        .put("/transfer")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          new: newTransfer,
+        });
+      const res2 = await request(app)
+        .put("/transfer")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          old: oldTransfer.body.income,
+        });
 
       expect(res1.statusCode).toEqual(422);
       expect(res2.statusCode).toEqual(422);
     });
 
     test("should respond with status 422 - req.body.new content is missing", async () => {
-      const oldTransfer = await request(app).post("/transfer").send(oldForm);
+      const oldTransfer = await request(app)
+        .post("/transfer")
+        .set("Authorization", `Bearer ${token}`)
+        .send(oldForm);
 
       for (let key in newForm) {
         const newTransfer = {
@@ -513,17 +681,23 @@ describe("PUT /transfer", () => {
         };
         delete newTransfer[key];
 
-        const response = await request(app).put("/transfer").send({
-          old: oldTransfer.body.transfer,
-          new: newTransfer,
-        });
+        const response = await request(app)
+          .put("/transfer")
+          .set("Authorization", `Bearer ${token}`)
+          .send({
+            old: oldTransfer.body.transfer,
+            new: newTransfer,
+          });
 
         expect(response.statusCode).toEqual(422);
       }
     });
 
     test("should respond with status 422 - req.body.old content is missing", async () => {
-      const transfer = await request(app).post("/transfer").send(oldForm);
+      const transfer = await request(app)
+        .post("/transfer")
+        .set("Authorization", `Bearer ${token}`)
+        .send(oldForm);
 
       const newTransfer = {
         ...transfer.body.transfer,
@@ -537,10 +711,13 @@ describe("PUT /transfer", () => {
           };
           delete oldTransfer[key];
 
-          const response = await request(app).put("/transfer").send({
-            old: oldTransfer,
-            new: newTransfer,
-          });
+          const response = await request(app)
+            .put("/transfer")
+            .set("Authorization", `Bearer ${token}`)
+            .send({
+              old: oldTransfer,
+              new: newTransfer,
+            });
 
           expect(response.statusCode).toEqual(422);
         }
