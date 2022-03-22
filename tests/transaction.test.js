@@ -27,14 +27,6 @@ describe("GET /expenses", () => {
         .set("Authorization", `Bearer ${token}`)
         .expect("Content-Type", /json/);
     });
-
-    test("should respond with 0 expenses", async () => {
-      const res = await request(app)
-        .get("/expenses")
-        .set("Authorization", `Bearer ${token}`);
-
-      expect(res.body.length).toBe(0);
-    });
   });
 });
 
@@ -62,14 +54,6 @@ describe("GET /incomes", () => {
         .set("Authorization", `Bearer ${token}`)
         .expect("Content-Type", /json/);
     });
-
-    test("should respond with 0 expenses", async () => {
-      const res = await request(app)
-        .get("/incomes")
-        .set("Authorization", `Bearer ${token}`);
-
-      expect(res.body.length).toBe(0);
-    });
   });
 });
 
@@ -96,14 +80,6 @@ describe("GET /transfers", () => {
         .get("/transfers")
         .set("Authorization", `Bearer ${token}`)
         .expect("Content-Type", /json/);
-    });
-
-    test("should respond with 0 expenses", async () => {
-      const res = await request(app)
-        .get("/transfers")
-        .set("Authorization", `Bearer ${token}`);
-
-      expect(res.body.length).toBe(0);
     });
   });
 });
