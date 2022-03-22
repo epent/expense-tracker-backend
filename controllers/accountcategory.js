@@ -26,9 +26,16 @@ exports.postAccount = async (req, res, next) => {
       name: name,
       category: category,
       balance: balance,
+      userId: req.userId,
     });
 
-    (await Balance.findOne()).increment({
+    (
+      await Balance.findOne({
+        where: {
+          userId: req.userId,
+        },
+      })
+    ).increment({
       total: balance,
     });
 
@@ -62,6 +69,7 @@ exports.postCategory = async (req, res, next) => {
     const category = await Category.create({
       name: name,
       balance: balance,
+      userId: req.userId,
     });
 
     res.status(201).json({ category: category });
