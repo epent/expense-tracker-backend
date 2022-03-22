@@ -11,8 +11,9 @@ module.exports = {
           id: uuidv4(),
           firstName: "John",
           lastName: "Doe",
-          email: "test@test.com",
-          password: "testpassword",
+          email: "john@doe.com",
+          password:
+            "$2a$10$gIOIoKvZ6d9p0EpnShPSpe7AM51rmpYQRERqQ7CWpaMgdP9lFOfn2",
           createdAt: new Date(),
           updatedAt: new Date(),
         },

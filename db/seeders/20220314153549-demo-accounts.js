@@ -11,6 +11,7 @@ module.exports = {
           balance: 0,
           createdAt: new Date(),
           updatedAt: new Date(),
+          userId: "4cc5127e-0b96-4d3e-a86b-f8a9cf03d0a6",
         },
         {
           name: "Visa",
@@ -18,6 +19,7 @@ module.exports = {
           balance: 0,
           createdAt: new Date(),
           updatedAt: new Date(),
+          userId: "4cc5127e-0b96-4d3e-a86b-f8a9cf03d0a6",
         },
         {
           name: "Master card",
@@ -25,6 +27,7 @@ module.exports = {
           balance: 0,
           createdAt: new Date(),
           updatedAt: new Date(),
+          userId: "4cc5127e-0b96-4d3e-a86b-f8a9cf03d0a6",
         },
         {
           name: "Cash",
@@ -32,6 +35,7 @@ module.exports = {
           balance: 0,
           createdAt: new Date(),
           updatedAt: new Date(),
+          userId: "4cc5127e-0b96-4d3e-a86b-f8a9cf03d0a6",
         },
       ],
       {}
