@@ -2,10 +2,11 @@
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable("balances", {
-      name: {
-        primaryKey: true,
-        type: Sequelize.STRING,
+      id: {
         allowNull: false,
+        primaryKey: true,
+        type: Sequelize.UUID,
+        defaultValue: Sequelize.UUIDV4,
       },
       total: {
         type: Sequelize.INTEGER,

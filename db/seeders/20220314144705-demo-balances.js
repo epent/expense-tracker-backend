@@ -1,12 +1,14 @@
 "use strict";
 
+const { v4: uuidv4 } = require("uuid");
+
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.bulkInsert(
       "balances",
       [
         {
-          name: "total_balances",
+          id: uuidv4(),
           total: 0,
           income: 0,
           expenses: 0,
@@ -15,7 +17,7 @@ module.exports = {
           userId: "a8eab1dd-4f9d-43c3-99f0-8847ba42e6ce",
         },
         {
-          name: "total_balances2",
+          id: uuidv4(),
           total: 0,
           income: 0,
           expenses: 0,

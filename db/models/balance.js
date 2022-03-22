@@ -4,10 +4,11 @@ module.exports = (sequelize, DataTypes) => {
   const Balance = sequelize.define(
     "balance",
     {
-      name: {
-        primaryKey: true,
-        type: DataTypes.STRING,
+      id: {
         allowNull: false,
+        primaryKey: true,
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
       },
       total: {
         type: DataTypes.INTEGER,
