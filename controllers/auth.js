@@ -32,16 +32,16 @@ exports.signup = async (req, res, next) => {
       password: hashedPassword,
     });
 
-    // const token = jwt.sign(
-    //   {
-    //     email: email,
-    //     userId: user.dataValues.id,
-    //   },
-    //   "f7AfW2hvZfUEP24S6xL5Dv27j94e4JPx",
-    //   { expiresIn: "1h" }
-    // );
+    const token = jwt.sign(
+      {
+        email: email,
+        userId: user.dataValues.id,
+      },
+      "f7AfW2hvZfUEP24S6xL5Dv27j94e4JPx",
+      { expiresIn: "1h" }
+    );
 
-    res.status(201).json({ user: user });
+    res.status(201).json({ user: user, token: token });
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
@@ -75,16 +75,16 @@ exports.login = async (req, res, next) => {
       throw error;
     }
 
-    // const token = jwt.sign(
-    //   {
-    //     email: req.body.Email,
-    //     userId: user.dataValues.id,
-    //   },
-    //   "f7AfW2hvZfUEP24S6xL5Dv27j94e4JPx",
-    //   { expiresIn: "1h" }
-    // );
+    const token = jwt.sign(
+      {
+        email: req.body.Email,
+        userId: user.dataValues.id,
+      },
+      "f7AfW2hvZfUEP24S6xL5Dv27j94e4JPx",
+      { expiresIn: "1h" }
+    );
 
-    res.status(200).json({ user: user });
+    res.status(200).json({ user: user, token: token });
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
