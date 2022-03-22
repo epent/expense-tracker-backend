@@ -27,12 +27,12 @@ describe("GET /balances", () => {
         .expect("Content-Type", /json/);
     });
 
-    test("should respond with 1 balance entry with name 'total_balances' ", async () => {
+    test("should respond with correct userId' ", async () => {
       const res = await request(app)
         .get("/balances")
         .set("Authorization", `Bearer ${token}`);
 
-      expect(res.body.name).toBe("total_balances");
+      expect(res.body.userId).toBe("b9698b4f-3d05-4b95-ba11-55814abe75d2");
     });
   });
 });
