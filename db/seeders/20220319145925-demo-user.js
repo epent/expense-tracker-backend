@@ -8,7 +8,7 @@ module.exports = {
       "users",
       [
         {
-          id: uuidv4(),
+          id: "a8eab1dd-4f9d-43c3-99f0-8847ba42e6ce",
           firstName: "John",
           lastName: "Doe",
           email: "john@doe.com",
@@ -18,7 +18,7 @@ module.exports = {
           updatedAt: new Date(),
         },
         {
-          id: uuidv4(),
+          id: "b9698b4f-3d05-4b95-ba11-55814abe75d2",
           firstName: "Unique",
           lastName: "User",
           email: "unique@user.com",

@@ -12,7 +12,7 @@ module.exports = {
           expenses: 0,
           createdAt: new Date(),
           updatedAt: new Date(),
-          userId: "4cc5127e-0b96-4d3e-a86b-f8a9cf03d0a6",
+          userId: "a8eab1dd-4f9d-43c3-99f0-8847ba42e6ce",
         },
         {
           name: "total_balances2",
@@ -21,7 +21,7 @@ module.exports = {
           expenses: 0,
           createdAt: new Date(),
           updatedAt: new Date(),
-          userId: "ca1cbe4e-ce5d-4a05-afc4-023735d18772",
+          userId: "b9698b4f-3d05-4b95-ba11-55814abe75d2",
         },
       ],
       {}
