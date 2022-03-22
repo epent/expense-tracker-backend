@@ -75,7 +75,11 @@ exports.postCategory = async (req, res, next) => {
 
 exports.getAccounts = async (req, res, next) => {
   try {
-    const accounts = await Account.findAll();
+    const accounts = await Account.findAll({
+      where: {
+        userId: req.userId,
+      },
+    });
 
     res.status(200).json(accounts);
   } catch (error) {
@@ -88,7 +92,11 @@ exports.getAccounts = async (req, res, next) => {
 
 exports.getCategories = async (req, res, next) => {
   try {
-    const categories = await Category.findAll();
+    const categories = await Category.findAll({
+      where: {
+        userId: req.userId,
+      },
+    });
 
     res.status(200).json(categories);
   } catch (error) {

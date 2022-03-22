@@ -149,7 +149,11 @@ exports.postTransfer = async (req, res, next) => {
 
 exports.getExpenses = async (req, res, next) => {
   try {
-    const expenses = await Expense.findAll();
+    const expenses = await Expense.findAll({
+      where: {
+        userId: req.userId,
+      },
+    });
 
     res.status(200).json(expenses);
   } catch (error) {
@@ -162,7 +166,11 @@ exports.getExpenses = async (req, res, next) => {
 
 exports.getIncomes = async (req, res, next) => {
   try {
-    const incomes = await Income.findAll();
+    const incomes = await Income.findAll({
+      where: {
+        userId: req.userId,
+      },
+    });
 
     res.status(200).json(incomes);
   } catch (error) {
@@ -175,7 +183,11 @@ exports.getIncomes = async (req, res, next) => {
 
 exports.getTransfers = async (req, res, next) => {
   try {
-    const transfers = await Transfer.findAll();
+    const transfers = await Transfer.findAll({
+      where: {
+        userId: req.userId,
+      },
+    });
 
     res.status(200).json(transfers);
   } catch (error) {
