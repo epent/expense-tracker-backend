@@ -44,6 +44,8 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
       },
     });
+    Transfer.belongsTo(models.user);
+    models.user.hasMany(Transfer);
   };
 
   return Transfer;

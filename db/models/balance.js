@@ -33,5 +33,10 @@ module.exports = (sequelize, DataTypes) => {
     {}
   );
 
+  Balance.associate = function (models) {
+    Balance.belongsTo(models.user);
+    models.user.hasMany(Balance);
+  };
+
   return Balance;
 };

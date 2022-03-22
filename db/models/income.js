@@ -36,6 +36,9 @@ module.exports = (sequelize, DataTypes) => {
   Income.associate = function (models) {
     Income.belongsTo(models.account);
     models.account.hasMany(Income);
+
+    Income.belongsTo(models.user);
+    models.user.hasMany(Income);
   };
 
   return Income;

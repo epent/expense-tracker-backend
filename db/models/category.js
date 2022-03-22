@@ -25,7 +25,10 @@ module.exports = (sequelize, DataTypes) => {
     {}
   );
 
-  Category.associate = function (models) {};
+  Category.associate = function (models) {
+    Category.belongsTo(models.user);
+    models.user.hasMany(Category);
+  };
 
   return Category;
 };

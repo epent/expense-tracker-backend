@@ -35,6 +35,9 @@ module.exports = (sequelize, DataTypes) => {
 
     Expense.belongsTo(models.category);
     models.category.hasMany(Expense);
+
+    Expense.belongsTo(models.user);
+    models.user.hasMany(Expense);
   };
 
   return Expense;

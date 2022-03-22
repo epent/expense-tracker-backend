@@ -26,10 +26,17 @@ module.exports = {
         type: Sequelize.DATE,
       },
       accountFromName: {
+        allowNull: false,
         type: Sequelize.STRING,
       },
       accountToName: {
+        allowNull: false,
         type: Sequelize.STRING,
+      },
+      userId: {
+        allowNull: false,
+        type: Sequelize.UUID,
+        defaultValue: Sequelize.UUIDV4,
       },
     });
   },
