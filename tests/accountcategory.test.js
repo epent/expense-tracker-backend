@@ -1,7 +1,5 @@
 const request = require("supertest");
 
-const { v4: uuidv4 } = require("uuid");
-
 const app = require("../app");
 
 describe("GET /accounts", () => {
@@ -40,17 +38,34 @@ describe("GET /accounts", () => {
 });
 
 describe("GET /categories", () => {
+  let token;
+  beforeAll(async () => {
+    const res = await request(app).post("/login").send({
+      Email: "unique@user.com",
+      Password: "1234567",
+    });
+    token = res.body.token;
+  });
+
   describe("positive tests", () => {
     test("should respond with status 200", async () => {
-      await request(app).get("/categories").expect(200);
+      await request(app)
+        .get("/categories")
+        .set("Authorization", `Bearer ${token}`)
+        .expect(200);
     });
 
     test("should respond with json type", async () => {
-      await request(app).get("/categories").expect("Content-Type", /json/);
+      await request(app)
+        .get("/categories")
+        .set("Authorization", `Bearer ${token}`)
+        .expect("Content-Type", /json/);
     });
 
     test("should respond with 2 categories", async () => {
-      const res = await request(app).get("/categories");
+      const res = await request(app)
+        .get("/categories")
+        .set("Authorization", `Bearer ${token}`);
 
       expect(res.body.length).toBe(2);
     });
@@ -156,26 +171,45 @@ describe("POST /account", () => {
 });
 
 describe("POST /category", () => {
+  let token;
+  beforeAll(async () => {
+    const res = await request(app).post("/login").send({
+      Email: "unique@user.com",
+      Password: "1234567",
+    });
+    token = res.body.token;
+  });
+
   describe("positive tests", () => {
     test("should respond with status 201, category body", async () => {
-      const res = await request(app).post("/category").send({
-        Name: "New 1",
-        Balance: 0,
-      });
+      const res = await request(app)
+        .post("/category")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          Name: "New 1",
+          Balance: 0,
+        });
 
       expect(res.statusCode).toEqual(201);
       expect(res.body).toHaveProperty("category");
     });
 
     test("should increase categories length", async () => {
-      const before = await request(app).get("/categories");
+      const before = await request(app)
+        .get("/categories")
+        .set("Authorization", `Bearer ${token}`);
 
-      await request(app).post("/category").send({
-        Name: "New 2",
-        Balance: 0,
-      });
+      await request(app)
+        .post("/category")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          Name: "New 2",
+          Balance: 0,
+        });
 
-      const after = await request(app).get("/categories");
+      const after = await request(app)
+        .get("/categories")
+        .set("Authorization", `Bearer ${token}`);
 
       expect(after.body.length).toBe(before.body.length + 1);
     });
@@ -183,18 +217,24 @@ describe("POST /category", () => {
 
   describe("negative tests", () => {
     test("should respond with status 422 - input is empty string", async () => {
-      const res = await request(app).post("/category").send({
-        Name: "",
-        Balance: 100,
-      });
+      const res = await request(app)
+        .post("/category")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          Name: "",
+          Balance: 100,
+        });
 
       expect(res.statusCode).toEqual(422);
     });
 
     test("should respond with status 422 - input is missing", async () => {
-      const res = await request(app).post("/category").send({
-        Name: "New 4",
-      });
+      const res = await request(app)
+        .post("/category")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          Name: "New 4",
+        });
 
       expect(res.statusCode).toEqual(422);
     });
