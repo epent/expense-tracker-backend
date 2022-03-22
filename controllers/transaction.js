@@ -31,21 +31,48 @@ exports.postExpense = async (req, res, next) => {
       categoryName: category,
       amount: amount,
       date: date,
+      userId: req.userId,
     });
 
-    (await Account.findByPk(account)).decrement({
+    (
+      await Account.findOne({
+        where: {
+          userId: req.userId,
+          name: account,
+        },
+      })
+    ).decrement({
       balance: amount,
     });
 
-    (await Category.findByPk(category)).increment({
+    (
+      await Category.findOne({
+        where: {
+          userId: req.userId,
+          name: category,
+        },
+      })
+    ).increment({
       balance: amount,
     });
 
-    (await Balance.findOne()).decrement({
+    (
+      await Balance.findOne({
+        where: {
+          userId: req.userId,
+        },
+      })
+    ).decrement({
       total: amount,
     });
 
-    (await Balance.findOne()).increment({
+    (
+      await Balance.findOne({
+        where: {
+          userId: req.userId,
+        },
+      })
+    ).increment({
       expenses: amount,
     });
 
@@ -83,13 +110,27 @@ exports.postIncome = async (req, res, next) => {
       accountName: account,
       amount: amount,
       date: date,
+      userId: req.userId,
     });
 
-    (await Account.findByPk(account)).increment({
+    (
+      await Account.findOne({
+        where: {
+          userId: req.userId,
+          name: account,
+        },
+      })
+    ).increment({
       balance: amount,
     });
 
-    (await Balance.findOne()).increment({
+    (
+      await Balance.findOne({
+        where: {
+          userId: req.userId,
+        },
+      })
+    ).increment({
       total: amount,
       income: amount,
     });
@@ -128,13 +169,28 @@ exports.postTransfer = async (req, res, next) => {
       accountToName: to,
       amount: amount,
       date: date,
+      userId: req.userId,
     });
 
-    (await Account.findByPk(from)).decrement({
+    (
+      await Account.findOne({
+        where: {
+          userId: req.userId,
+          name: from,
+        },
+      })
+    ).decrement({
       balance: amount,
     });
 
-    (await Account.findByPk(to)).increment({
+    (
+      await Account.findOne({
+        where: {
+          userId: req.userId,
+          name: to,
+        },
+      })
+    ).increment({
       balance: amount,
     });
 
