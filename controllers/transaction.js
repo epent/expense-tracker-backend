@@ -437,6 +437,7 @@ exports.updateExpense = async (req, res, next) => {
       {
         where: {
           id: newExpense.id,
+          userId: req.userId,
         },
       }
     );
@@ -447,15 +448,35 @@ exports.updateExpense = async (req, res, next) => {
 
     //update amount
     if (oldExpense.amount !== newExpense.amount) {
-      (await Account.findByPk(oldExpense.accountName)).increment({
+      (
+        await Account.findOne({
+          where: {
+            name: oldExpense.accountName,
+            userId: req.userId,
+          },
+        })
+      ).increment({
         balance: oldExpense.amount - newExpense.amount,
       });
 
-      (await Category.findByPk(oldExpense.categoryName)).increment({
+      (
+        await Category.findOne({
+          where: {
+            name: oldExpense.categoryName,
+            userId: req.userId,
+          },
+        })
+      ).increment({
         balance: newExpense.amount - oldExpense.amount,
       });
 
-      (await Balance.findOne()).increment({
+      (
+        await Balance.findOne({
+          where: {
+            userId: req.userId,
+          },
+        })
+      ).increment({
         total: oldExpense.amount - newExpense.amount,
         expenses: newExpense.amount - oldExpense.amount,
       });
@@ -464,12 +485,26 @@ exports.updateExpense = async (req, res, next) => {
     //update account
     if (oldExpense.accountName !== newExpense.from) {
       //old account
-      (await Account.findByPk(oldExpense.accountName)).increment({
+      (
+        await Account.findOne({
+          where: {
+            name: oldExpense.accountName,
+            userId: req.userId,
+          },
+        })
+      ).increment({
         balance: newExpense.amount,
       });
 
       //new account
-      (await Account.findByPk(newExpense.from)).decrement({
+      (
+        await Account.findOne({
+          where: {
+            name: newExpense.from,
+            userId: req.userId,
+          },
+        })
+      ).decrement({
         balance: newExpense.amount,
       });
     }
@@ -477,12 +512,26 @@ exports.updateExpense = async (req, res, next) => {
     //update category
     if (oldExpense.categoryName !== newExpense.to) {
       //old category
-      (await Category.findByPk(oldExpense.categoryName)).decrement({
+      (
+        await Category.findOne({
+          where: {
+            name: oldExpense.categoryName,
+            userId: req.userId,
+          },
+        })
+      ).decrement({
         balance: newExpense.amount,
       });
 
       //new category
-      (await Category.findByPk(newExpense.to)).increment({
+      (
+        await Category.findOne({
+          where: {
+            name: newExpense.to,
+            userId: req.userId,
+          },
+        })
+      ).increment({
         balance: newExpense.amount,
       });
     }
@@ -539,6 +588,7 @@ exports.updateIncome = async (req, res, next) => {
       {
         where: {
           id: newIncome.id,
+          userId: req.userId,
         },
       }
     );
@@ -549,11 +599,24 @@ exports.updateIncome = async (req, res, next) => {
 
     //update amount
     if (oldIncome.amount !== newIncome.amount) {
-      (await Account.findByPk(oldIncome.accountName)).increment({
+      (
+        await Account.findOne({
+          where: {
+            name: oldIncome.accountName,
+            userId: req.userId,
+          },
+        })
+      ).increment({
         balance: newIncome.amount - oldIncome.amount,
       });
 
-      (await Balance.findOne()).increment({
+      (
+        await Balance.findOne({
+          where: {
+            userId: req.userId,
+          },
+        })
+      ).increment({
         total: newIncome.amount - oldIncome.amount,
         income: newIncome.amount - oldIncome.amount,
       });
@@ -562,12 +625,26 @@ exports.updateIncome = async (req, res, next) => {
     //update account
     if (oldIncome.accountName !== newIncome.to) {
       //old account
-      (await Account.findByPk(oldIncome.accountName)).decrement({
+      (
+        await Account.findOne({
+          where: {
+            name: oldIncome.accountName,
+            userId: req.userId,
+          },
+        })
+      ).decrement({
         balance: newIncome.amount,
       });
 
       //new account
-      (await Account.findByPk(newIncome.to)).increment({
+      (
+        await Account.findOne({
+          where: {
+            name: newIncome.to,
+            userId: req.userId,
+          },
+        })
+      ).increment({
         balance: newIncome.amount,
       });
     }
@@ -624,6 +701,7 @@ exports.updateTransfer = async (req, res, next) => {
       {
         where: {
           id: newTransfer.id,
+          userId: req.userId,
         },
       }
     );
@@ -634,11 +712,25 @@ exports.updateTransfer = async (req, res, next) => {
 
     //update amount
     if (oldTransfer.amount !== newTransfer.amount) {
-      (await Account.findByPk(oldTransfer.accountFromName)).increment({
+      (
+        await Account.findOne({
+          where: {
+            name: oldTransfer.accountFromName,
+            userId: req.userId,
+          },
+        })
+      ).increment({
         balance: oldTransfer.amount - newTransfer.amount,
       });
 
-      (await Account.findByPk(oldTransfer.accountToName)).increment({
+      (
+        await Account.findOne({
+          where: {
+            name: oldTransfer.accountToName,
+            userId: req.userId,
+          },
+        })
+      ).increment({
         balance: newTransfer.amount - oldTransfer.amount,
       });
     }
@@ -646,12 +738,26 @@ exports.updateTransfer = async (req, res, next) => {
     //update account "from"
     if (oldTransfer.accountFromName !== newTransfer.from) {
       //old account
-      (await Account.findByPk(oldTransfer.accountFromName)).increment({
+      (
+        await Account.findOne({
+          where: {
+            name: oldTransfer.accountFromName,
+            userId: req.userId,
+          },
+        })
+      ).increment({
         balance: newTransfer.amount,
       });
 
       //new account
-      (await Account.findByPk(newTransfer.from)).decrement({
+      (
+        await Account.findOne({
+          where: {
+            name: newTransfer.from,
+            userId: req.userId,
+          },
+        })
+      ).decrement({
         balance: newTransfer.amount,
       });
     }
@@ -659,12 +765,26 @@ exports.updateTransfer = async (req, res, next) => {
     //update account "to"
     if (oldTransfer.accountToName !== newTransfer.to) {
       //old account
-      (await Account.findByPk(oldTransfer.accountToName)).decrement({
+      (
+        await Account.findOne({
+          where: {
+            name: oldTransfer.accountToName,
+            userId: req.userId,
+          },
+        })
+      ).decrement({
         balance: newTransfer.amount,
       });
 
       //new account
-      (await Account.findByPk(newTransfer.to)).increment({
+      (
+        await Account.findOne({
+          where: {
+            name: newTransfer.to,
+            userId: req.userId,
+          },
+        })
+      ).increment({
         balance: newTransfer.amount,
       });
     }
