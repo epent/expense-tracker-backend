@@ -406,7 +406,8 @@ exports.updateExpense = async (req, res, next) => {
       !req.body.old.hasOwnProperty("accountName") ||
       !req.body.old.hasOwnProperty("categoryName") ||
       !req.body.old.hasOwnProperty("amount") ||
-      !req.body.old.hasOwnProperty("date")
+      !req.body.old.hasOwnProperty("date") ||
+      !req.body.old.hasOwnProperty("userId")
     ) {
       const error = new Error("req.body.old content is missing");
       error.statusCode = 422;
@@ -557,7 +558,8 @@ exports.updateIncome = async (req, res, next) => {
       !req.body.old.hasOwnProperty("from") ||
       !req.body.old.hasOwnProperty("accountName") ||
       !req.body.old.hasOwnProperty("amount") ||
-      !req.body.old.hasOwnProperty("date")
+      !req.body.old.hasOwnProperty("date") ||
+      !req.body.old.hasOwnProperty("userId")
     ) {
       const error = new Error("req.body.old content is missing");
       error.statusCode = 422;
@@ -670,7 +672,8 @@ exports.updateTransfer = async (req, res, next) => {
       !req.body.old.hasOwnProperty("accountFromName") ||
       !req.body.old.hasOwnProperty("accountToName") ||
       !req.body.old.hasOwnProperty("amount") ||
-      !req.body.old.hasOwnProperty("date")
+      !req.body.old.hasOwnProperty("date") ||
+      !req.body.old.hasOwnProperty("userId")
     ) {
       const error = new Error("req.body.old content is missing");
       error.statusCode = 422;
