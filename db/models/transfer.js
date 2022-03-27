@@ -30,22 +30,12 @@ module.exports = (sequelize, DataTypes) => {
     {}
   );
   Transfer.associate = function (models) {
-    models.account.hasMany(Transfer, {
-      as: "AccountFrom",
-      foreignKey: {
-        name: "accountFromName",
-        allowNull: false,
-      },
-    });
-    models.account.hasMany(Transfer, {
-      as: "AccountTo",
-      foreignKey: {
-        name: "accountToName",
-        allowNull: false,
-      },
-    });
     Transfer.belongsTo(models.user);
     models.user.hasMany(Transfer);
+
+    Transfer.belongsToMany(models.account, {
+      through: models.account_transfer,
+    });
   };
 
   return Transfer;
