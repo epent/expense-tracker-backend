@@ -282,7 +282,7 @@ exports.deleteExpense = async (req, res, next) => {
     (
       await Account.findOne({
         where: {
-          name: req.body.accountName,
+          name: req.body["account.name"],
           userId: req.userId,
         },
       })
@@ -293,7 +293,7 @@ exports.deleteExpense = async (req, res, next) => {
     (
       await Category.findOne({
         where: {
-          name: req.body.categoryName,
+          name: req.body["category.name"],
           userId: req.userId,
         },
       })
@@ -342,7 +342,7 @@ exports.deleteIncome = async (req, res, next) => {
     (
       await Account.findOne({
         where: {
-          name: req.body.accountName,
+          name: req.body["account.name"],
           userId: req.userId,
         },
       })
@@ -382,7 +382,7 @@ exports.deleteTransfer = async (req, res, next) => {
     (
       await Account.findOne({
         where: {
-          name: req.body.accountFromName,
+          name: req.body.from,
           userId: req.userId,
         },
       })
@@ -393,7 +393,7 @@ exports.deleteTransfer = async (req, res, next) => {
     (
       await Account.findOne({
         where: {
-          name: req.body.accountToName,
+          name: req.body.to,
           userId: req.userId,
         },
       })
@@ -419,8 +419,8 @@ exports.updateExpense = async (req, res, next) => {
     }
     if (
       !req.body.old.hasOwnProperty("id") ||
-      !req.body.old.hasOwnProperty("accountName") ||
-      !req.body.old.hasOwnProperty("categoryName") ||
+      !req.body.old.hasOwnProperty("account.name") ||
+      !req.body.old.hasOwnProperty("category.name") ||
       !req.body.old.hasOwnProperty("amount") ||
       !req.body.old.hasOwnProperty("date") ||
       !req.body.old.hasOwnProperty("userId")
