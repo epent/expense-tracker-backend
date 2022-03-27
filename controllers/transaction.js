@@ -20,39 +20,38 @@ exports.postExpense = async (req, res, next) => {
       error.statusCode = 422;
       throw error;
     }
-
-    const account = req.body.From;
-    const category = req.body.To;
+    const from = req.body.From;
+    const to = req.body.To;
     const amount = req.body.Amount;
     const date = req.body.Date;
 
+    const account = await Account.findOne({
+      where: {
+        userId: req.userId,
+        name: from,
+      },
+    });
+
+    const category = await Category.findOne({
+      where: {
+        userId: req.userId,
+        name: to,
+      },
+    });
+
     const expense = await Expense.create({
-      accountName: account,
-      categoryName: category,
+      accountId: account.id,
+      categoryId: category.id,
       amount: amount,
       date: date,
       userId: req.userId,
     });
 
-    (
-      await Account.findOne({
-        where: {
-          userId: req.userId,
-          name: account,
-        },
-      })
-    ).decrement({
+    account.decrement({
       balance: amount,
     });
 
-    (
-      await Category.findOne({
-        where: {
-          userId: req.userId,
-          name: category,
-        },
-      })
-    ).increment({
+    category.increment({
       balance: amount,
     });
 
@@ -101,26 +100,26 @@ exports.postIncome = async (req, res, next) => {
     }
 
     const from = req.body.From;
-    const account = req.body.To;
+    const to = req.body.To;
     const amount = req.body.Amount;
     const date = req.body.Date;
 
+    const account = await Account.findOne({
+      where: {
+        userId: req.userId,
+        name: to,
+      },
+    });
+
     const income = await Income.create({
       from: from,
-      accountName: account,
+      accountId: account.id,
       amount: amount,
       date: date,
       userId: req.userId,
     });
 
-    (
-      await Account.findOne({
-        where: {
-          userId: req.userId,
-          name: account,
-        },
-      })
-    ).increment({
+    account.increment({
       balance: amount,
     });
 
@@ -164,33 +163,34 @@ exports.postTransfer = async (req, res, next) => {
     const amount = req.body.Amount;
     const date = req.body.Date;
 
+    const accountFrom = await Account.findOne({
+      where: {
+        userId: req.userId,
+        name: from,
+      },
+    });
+
+    const accountTo = await Account.findOne({
+      where: {
+        userId: req.userId,
+        name: to,
+      },
+    });
+
     const transfer = await Transfer.create({
-      accountFromName: from,
-      accountToName: to,
       amount: amount,
       date: date,
       userId: req.userId,
     });
 
-    (
-      await Account.findOne({
-        where: {
-          userId: req.userId,
-          name: from,
-        },
-      })
-    ).decrement({
+    transfer.addAccount(accountFrom, { through: { accountType: "from" } });
+    transfer.addAccount(accountTo, { through: { accountType: "to" } });
+
+    accountFrom.decrement({
       balance: amount,
     });
 
-    (
-      await Account.findOne({
-        where: {
-          userId: req.userId,
-          name: to,
-        },
-      })
-    ).increment({
+    accountTo.increment({
       balance: amount,
     });
 
@@ -206,9 +206,14 @@ exports.postTransfer = async (req, res, next) => {
 exports.getExpenses = async (req, res, next) => {
   try {
     const expenses = await Expense.findAll({
+      raw: true,
       where: {
         userId: req.userId,
       },
+      include: [
+        { model: Account, attributes: ["name"] },
+        { model: Category, attributes: ["name"] },
+      ],
     });
 
     res.status(200).json(expenses);
@@ -223,9 +228,11 @@ exports.getExpenses = async (req, res, next) => {
 exports.getIncomes = async (req, res, next) => {
   try {
     const incomes = await Income.findAll({
+      raw: true,
       where: {
         userId: req.userId,
       },
+      include: [{ model: Account, attributes: ["name"] }],
     });
 
     res.status(200).json(incomes);
@@ -243,6 +250,15 @@ exports.getTransfers = async (req, res, next) => {
       where: {
         userId: req.userId,
       },
+      include: [
+        {
+          model: Account,
+          attributes: ["name"],
+          through: {
+            attributes: ["accountType"],
+          },
+        },
+      ],
     });
 
     res.status(200).json(transfers);
