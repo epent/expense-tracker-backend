@@ -3,8 +3,13 @@ module.exports = (sequelize, DataTypes) => {
   const Account = sequelize.define(
     "account",
     {
-      name: {
+      id: {
+        allowNull: false,
         primaryKey: true,
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+      },
+      name: {
         type: DataTypes.STRING,
         allowNull: false,
       },

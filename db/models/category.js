@@ -4,8 +4,13 @@ module.exports = (sequelize, DataTypes) => {
   const Category = sequelize.define(
     "category",
     {
-      name: {
+      id: {
+        allowNull: false,
         primaryKey: true,
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+      },
+      name: {
         type: DataTypes.STRING,
         allowNull: false,
       },

@@ -24,13 +24,15 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE,
       },
-      accountName: {
+      accountId: {
         allowNull: false,
-        type: Sequelize.STRING,
+        type: Sequelize.UUID,
+        defaultValue: Sequelize.UUIDV4,
       },
-      categoryName: {
+      categoryId: {
         allowNull: false,
-        type: Sequelize.STRING,
+        type: Sequelize.UUID,
+        defaultValue: Sequelize.UUIDV4,
       },
       userId: {
         allowNull: false,

@@ -3,12 +3,12 @@
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.addConstraint("expenses", {
-      fields: ["accountName"],
+      fields: ["accountId"],
       type: "foreign key",
       name: "expense_account_association",
       references: {
         table: "accounts",
-        field: "name",
+        field: "id",
       },
     });
   },
