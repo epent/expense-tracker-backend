@@ -5,6 +5,7 @@ const Transfer = db.transfer;
 const Account = db.account;
 const Category = db.category;
 const Balance = db.balance;
+const AccountTransfer = db.account_transfer;
 
 exports.postExpense = async (req, res, next) => {
   try {
@@ -20,6 +21,7 @@ exports.postExpense = async (req, res, next) => {
       error.statusCode = 422;
       throw error;
     }
+
     const from = req.body.From;
     const to = req.body.To;
     const amount = req.body.Amount;
@@ -39,11 +41,19 @@ exports.postExpense = async (req, res, next) => {
       },
     });
 
+    const balance = await Balance.findOne({
+      where: {
+        userId: req.userId,
+      },
+    });
+
     const expense = await Expense.create({
-      accountId: account.id,
-      categoryId: category.id,
       amount: amount,
       date: date,
+      from: from,
+      to: to,
+      accountId: account.id,
+      categoryId: category.id,
       userId: req.userId,
     });
 
@@ -55,23 +65,8 @@ exports.postExpense = async (req, res, next) => {
       balance: amount,
     });
 
-    (
-      await Balance.findOne({
-        where: {
-          userId: req.userId,
-        },
-      })
-    ).decrement({
-      total: amount,
-    });
-
-    (
-      await Balance.findOne({
-        where: {
-          userId: req.userId,
-        },
-      })
-    ).increment({
+    balance.increment({
+      total: -amount,
       expenses: amount,
     });
 
@@ -111,11 +106,18 @@ exports.postIncome = async (req, res, next) => {
       },
     });
 
+    const balance = await Balance.findOne({
+      where: {
+        userId: req.userId,
+      },
+    });
+
     const income = await Income.create({
-      from: from,
-      accountId: account.id,
       amount: amount,
       date: date,
+      from: from,
+      to: to,
+      accountId: account.id,
       userId: req.userId,
     });
 
@@ -123,13 +125,7 @@ exports.postIncome = async (req, res, next) => {
       balance: amount,
     });
 
-    (
-      await Balance.findOne({
-        where: {
-          userId: req.userId,
-        },
-      })
-    ).increment({
+    balance.increment({
       total: amount,
       income: amount,
     });
@@ -163,6 +159,14 @@ exports.postTransfer = async (req, res, next) => {
     const amount = req.body.Amount;
     const date = req.body.Date;
 
+    const transfer = await Transfer.create({
+      amount: amount,
+      date: date,
+      from: from,
+      to: to,
+      userId: req.userId,
+    });
+
     const accountFrom = await Account.findOne({
       where: {
         userId: req.userId,
@@ -175,12 +179,6 @@ exports.postTransfer = async (req, res, next) => {
         userId: req.userId,
         name: to,
       },
-    });
-
-    const transfer = await Transfer.create({
-      amount: amount,
-      date: date,
-      userId: req.userId,
     });
 
     transfer.addAccount(accountFrom, { through: { accountType: "from" } });
@@ -206,14 +204,9 @@ exports.postTransfer = async (req, res, next) => {
 exports.getExpenses = async (req, res, next) => {
   try {
     const expenses = await Expense.findAll({
-      raw: true,
       where: {
         userId: req.userId,
       },
-      include: [
-        { model: Account, attributes: ["name"] },
-        { model: Category, attributes: ["name"] },
-      ],
     });
 
     res.status(200).json(expenses);
@@ -228,11 +221,9 @@ exports.getExpenses = async (req, res, next) => {
 exports.getIncomes = async (req, res, next) => {
   try {
     const incomes = await Income.findAll({
-      raw: true,
       where: {
         userId: req.userId,
       },
-      include: [{ model: Account, attributes: ["name"] }],
     });
 
     res.status(200).json(incomes);
@@ -250,15 +241,6 @@ exports.getTransfers = async (req, res, next) => {
       where: {
         userId: req.userId,
       },
-      include: [
-        {
-          model: Account,
-          attributes: ["name"],
-          through: {
-            attributes: ["accountType"],
-          },
-        },
-      ],
     });
 
     res.status(200).json(transfers);
@@ -282,7 +264,7 @@ exports.deleteExpense = async (req, res, next) => {
     (
       await Account.findOne({
         where: {
-          name: req.body["account.name"],
+          id: req.body.accountId,
           userId: req.userId,
         },
       })
@@ -293,7 +275,7 @@ exports.deleteExpense = async (req, res, next) => {
     (
       await Category.findOne({
         where: {
-          name: req.body["category.name"],
+          id: req.body.categoryId,
           userId: req.userId,
         },
       })
@@ -309,16 +291,7 @@ exports.deleteExpense = async (req, res, next) => {
       })
     ).increment({
       total: req.body.amount,
-    });
-
-    (
-      await Balance.findOne({
-        where: {
-          userId: req.userId,
-        },
-      })
-    ).decrement({
-      expenses: req.body.amount,
+      expenses: -req.body.amount,
     });
 
     res.status(204).json(`Transaction ${req.body.id} was deleted`);
@@ -342,7 +315,7 @@ exports.deleteIncome = async (req, res, next) => {
     (
       await Account.findOne({
         where: {
-          name: req.body["account.name"],
+          id: req.body.accountId,
           userId: req.userId,
         },
       })
@@ -376,6 +349,12 @@ exports.deleteTransfer = async (req, res, next) => {
       where: {
         id: req.body.id,
         userId: req.userId,
+      },
+    });
+
+    await AccountTransfer.destroy({
+      where: {
+        transferId: req.body.id,
       },
     });
 
@@ -419,8 +398,10 @@ exports.updateExpense = async (req, res, next) => {
     }
     if (
       !req.body.old.hasOwnProperty("id") ||
-      !req.body.old.hasOwnProperty("account.name") ||
-      !req.body.old.hasOwnProperty("category.name") ||
+      !req.body.old.hasOwnProperty("from") ||
+      !req.body.old.hasOwnProperty("to") ||
+      !req.body.old.hasOwnProperty("accountId") ||
+      !req.body.old.hasOwnProperty("categoryId") ||
       !req.body.old.hasOwnProperty("amount") ||
       !req.body.old.hasOwnProperty("date") ||
       !req.body.old.hasOwnProperty("userId")
@@ -444,12 +425,48 @@ exports.updateExpense = async (req, res, next) => {
     const oldExpense = req.body.old;
     const newExpense = req.body.new;
 
+    const oldAccount = await Account.findOne({
+      where: {
+        id: oldExpense.accountId,
+        userId: req.userId,
+      },
+    });
+
+    const oldCategory = await Category.findOne({
+      where: {
+        id: oldExpense.categoryId,
+        userId: req.userId,
+      },
+    });
+
+    const newAccount = await Account.findOne({
+      where: {
+        userId: req.userId,
+        name: newExpense.from,
+      },
+    });
+
+    const newCategory = await Category.findOne({
+      where: {
+        userId: req.userId,
+        name: newExpense.to,
+      },
+    });
+
+    const balance = await Balance.findOne({
+      where: {
+        userId: req.userId,
+      },
+    });
+
     const result = await Expense.update(
       {
-        accountName: newExpense.from,
-        categoryName: newExpense.to,
         amount: newExpense.amount,
         date: newExpense.date,
+        from: newExpense.from,
+        to: newExpense.to,
+        accountId: newAccount.id,
+        categoryId: newCategory.id,
       },
       {
         where: {
@@ -465,90 +482,42 @@ exports.updateExpense = async (req, res, next) => {
 
     //update amount
     if (oldExpense.amount !== newExpense.amount) {
-      (
-        await Account.findOne({
-          where: {
-            name: oldExpense.accountName,
-            userId: req.userId,
-          },
-        })
-      ).increment({
+      oldAccount.increment({
         balance: oldExpense.amount - newExpense.amount,
       });
 
-      (
-        await Category.findOne({
-          where: {
-            name: oldExpense.categoryName,
-            userId: req.userId,
-          },
-        })
-      ).increment({
+      oldCategory.increment({
         balance: newExpense.amount - oldExpense.amount,
       });
 
-      (
-        await Balance.findOne({
-          where: {
-            userId: req.userId,
-          },
-        })
-      ).increment({
+      balance.increment({
         total: oldExpense.amount - newExpense.amount,
         expenses: newExpense.amount - oldExpense.amount,
       });
     }
 
     //update account
-    if (oldExpense.accountName !== newExpense.from) {
+    if (oldExpense.from !== newExpense.from) {
       //old account
-      (
-        await Account.findOne({
-          where: {
-            name: oldExpense.accountName,
-            userId: req.userId,
-          },
-        })
-      ).increment({
+      oldAccount.increment({
         balance: newExpense.amount,
       });
 
       //new account
-      (
-        await Account.findOne({
-          where: {
-            name: newExpense.from,
-            userId: req.userId,
-          },
-        })
-      ).decrement({
+      newAccount.decrement({
         balance: newExpense.amount,
       });
     }
 
     //update category
-    if (oldExpense.categoryName !== newExpense.to) {
+    if (oldExpense.to !== newExpense.to) {
       //old category
-      (
-        await Category.findOne({
-          where: {
-            name: oldExpense.categoryName,
-            userId: req.userId,
-          },
-        })
-      ).decrement({
+      oldCategory.decrement({
         balance: newExpense.amount,
       });
 
       //new category
-      (
-        await Category.findOne({
-          where: {
-            name: newExpense.to,
-            userId: req.userId,
-          },
-        })
-      ).increment({
+      newCategory.increment({
         balance: newExpense.amount,
       });
     }
@@ -572,7 +541,8 @@ exports.updateIncome = async (req, res, next) => {
     if (
       !req.body.old.hasOwnProperty("id") ||
       !req.body.old.hasOwnProperty("from") ||
-      !req.body.old.hasOwnProperty("accountName") ||
+      !req.body.old.hasOwnProperty("to") ||
+      !req.body.old.hasOwnProperty("accountId") ||
       !req.body.old.hasOwnProperty("amount") ||
       !req.body.old.hasOwnProperty("date") ||
       !req.body.old.hasOwnProperty("userId")
@@ -596,12 +566,33 @@ exports.updateIncome = async (req, res, next) => {
     const oldIncome = req.body.old;
     const newIncome = req.body.new;
 
+    const oldAccount = await Account.findOne({
+      where: {
+        id: oldIncome.accountId,
+        userId: req.userId,
+      },
+    });
+
+    const newAccount = await Account.findOne({
+      where: {
+        userId: req.userId,
+        name: newIncome.to,
+      },
+    });
+
+    const balance = await Balance.findOne({
+      where: {
+        userId: req.userId,
+      },
+    });
+
     const result = await Income.update(
       {
-        from: newIncome.from,
-        accountName: newIncome.to,
         amount: newIncome.amount,
         date: newIncome.date,
+        from: newIncome.from,
+        to: newIncome.to,
+        accountId: newAccount.id,
       },
       {
         where: {
@@ -617,52 +608,25 @@ exports.updateIncome = async (req, res, next) => {
 
     //update amount
     if (oldIncome.amount !== newIncome.amount) {
-      (
-        await Account.findOne({
-          where: {
-            name: oldIncome.accountName,
-            userId: req.userId,
-          },
-        })
-      ).increment({
+      oldAccount.increment({
         balance: newIncome.amount - oldIncome.amount,
       });
 
-      (
-        await Balance.findOne({
-          where: {
-            userId: req.userId,
-          },
-        })
-      ).increment({
+      balance.increment({
         total: newIncome.amount - oldIncome.amount,
         income: newIncome.amount - oldIncome.amount,
       });
     }
 
     //update account
-    if (oldIncome.accountName !== newIncome.to) {
+    if (oldIncome.from !== newIncome.to) {
       //old account
-      (
-        await Account.findOne({
-          where: {
-            name: oldIncome.accountName,
-            userId: req.userId,
-          },
-        })
-      ).decrement({
+      oldAccount.decrement({
         balance: newIncome.amount,
       });
 
       //new account
-      (
-        await Account.findOne({
-          where: {
-            name: newIncome.to,
-            userId: req.userId,
-          },
-        })
-      ).increment({
+      newAccount.increment({
         balance: newIncome.amount,
       });
     }
@@ -685,8 +649,8 @@ exports.updateTransfer = async (req, res, next) => {
     }
     if (
       !req.body.old.hasOwnProperty("id") ||
-      !req.body.old.hasOwnProperty("accountFromName") ||
-      !req.body.old.hasOwnProperty("accountToName") ||
+      !req.body.old.hasOwnProperty("from") ||
+      !req.body.old.hasOwnProperty("to") ||
       !req.body.old.hasOwnProperty("amount") ||
       !req.body.old.hasOwnProperty("date") ||
       !req.body.old.hasOwnProperty("userId")
@@ -710,12 +674,40 @@ exports.updateTransfer = async (req, res, next) => {
     const oldTransfer = req.body.old;
     const newTransfer = req.body.new;
 
+    const oldFrom = await Account.findOne({
+      where: {
+        name: oldTransfer.from,
+        userId: req.userId,
+      },
+    });
+
+    const oldTo = await Account.findOne({
+      where: {
+        name: oldTransfer.to,
+        userId: req.userId,
+      },
+    });
+
+    const newFrom = await Account.findOne({
+      where: {
+        userId: req.userId,
+        name: newTransfer.from,
+      },
+    });
+
+    const newTo = await Account.findOne({
+      where: {
+        userId: req.userId,
+        name: newTransfer.to,
+      },
+    });
+
     const result = await Transfer.update(
       {
-        accountFromName: newTransfer.from,
-        accountToName: newTransfer.to,
         amount: newTransfer.amount,
         date: newTransfer.date,
+        from: newTransfer.from,
+        to: newTransfer.to,
       },
       {
         where: {
@@ -731,25 +723,11 @@ exports.updateTransfer = async (req, res, next) => {
 
     //update amount
     if (oldTransfer.amount !== newTransfer.amount) {
-      (
-        await Account.findOne({
-          where: {
-            name: oldTransfer.accountFromName,
-            userId: req.userId,
-          },
-        })
-      ).increment({
+      oldFrom.increment({
         balance: oldTransfer.amount - newTransfer.amount,
       });
 
-      (
-        await Account.findOne({
-          where: {
-            name: oldTransfer.accountToName,
-            userId: req.userId,
-          },
-        })
-      ).increment({
+      oldTo.increment({
         balance: newTransfer.amount - oldTransfer.amount,
       });
     }
@@ -757,55 +735,47 @@ exports.updateTransfer = async (req, res, next) => {
     //update account "from"
     if (oldTransfer.accountFromName !== newTransfer.from) {
       //old account
-      (
-        await Account.findOne({
-          where: {
-            name: oldTransfer.accountFromName,
-            userId: req.userId,
-          },
-        })
-      ).increment({
+      oldFrom.increment({
         balance: newTransfer.amount,
       });
 
       //new account
-      (
-        await Account.findOne({
-          where: {
-            name: newTransfer.from,
-            userId: req.userId,
-          },
-        })
-      ).decrement({
+      newFrom.decrement({
         balance: newTransfer.amount,
       });
+
+      AccountTransfer.update(
+        { accountId: newFrom.id },
+        {
+          where: {
+            transferId: newTransfer.id,
+            accountType: "from",
+          },
+        }
+      );
     }
 
     //update account "to"
     if (oldTransfer.accountToName !== newTransfer.to) {
       //old account
-      (
-        await Account.findOne({
-          where: {
-            name: oldTransfer.accountToName,
-            userId: req.userId,
-          },
-        })
-      ).decrement({
+      oldTo.decrement({
         balance: newTransfer.amount,
       });
 
       //new account
-      (
-        await Account.findOne({
-          where: {
-            name: newTransfer.to,
-            userId: req.userId,
-          },
-        })
-      ).increment({
+      newTo.increment({
         balance: newTransfer.amount,
       });
+
+      AccountTransfer.update(
+        { accountId: newTo.id },
+        {
+          where: {
+            transferId: newTransfer.id,
+            accountType: "to",
+          },
+        }
+      );
     }
 
     res.status(200).json(`Transaction ${newTransfer.id} was updated`);
