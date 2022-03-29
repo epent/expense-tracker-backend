@@ -10,10 +10,6 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
       },
-      from: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
       amount: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -21,6 +17,14 @@ module.exports = (sequelize, DataTypes) => {
       date: {
         type: DataTypes.DATEONLY,
         allowNull: false,
+      },
+      from: {
+        allowNull: false,
+        type: DataTypes.STRING,
+      },
+      to: {
+        allowNull: false,
+        type: DataTypes.STRING,
       },
       createdAt: {
         allowNull: false,

@@ -8,10 +8,6 @@ module.exports = {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
       },
-      from: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
       amount: {
         type: Sequelize.INTEGER,
         allowNull: false,
@@ -19,6 +15,14 @@ module.exports = {
       date: {
         type: Sequelize.DATEONLY,
         allowNull: false,
+      },
+      from: {
+        allowNull: false,
+        type: Sequelize.STRING,
+      },
+      to: {
+        allowNull: false,
+        type: Sequelize.STRING,
       },
       createdAt: {
         allowNull: false,
