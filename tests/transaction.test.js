@@ -85,13 +85,14 @@ describe("GET /transfers", () => {
 });
 
 describe("POST /expense", () => {
-  let token;
+  let token, userId;
   beforeAll(async () => {
     const res = await request(app).post("/login").send({
       Email: "unique@user.com",
       Password: "1234567",
     });
     token = res.body.token;
+    userId = res.body.user.id;
   });
 
   describe("positive tests", () => {
@@ -148,14 +149,18 @@ describe("POST /expense", () => {
     });
 
     test("should update Account balance", async () => {
-      const before = await db.account.findByPk(req.From);
+      const before = await db.account.findOne({
+        where: { userId: userId, name: req.From },
+      });
 
       await request(app)
         .post("/expense")
         .set("Authorization", `Bearer ${token}`)
         .send(req);
 
-      const after = await db.account.findByPk(req.From);
+      const after = await db.account.findOne({
+        where: { userId: userId, name: req.From },
+      });
 
       expect(after.dataValues.balance).toBe(
         before.dataValues.balance - req.Amount
@@ -163,14 +168,18 @@ describe("POST /expense", () => {
     });
 
     test("should update Category balance", async () => {
-      const before = await db.category.findByPk(req.To);
+      const before = await db.category.findOne({
+        where: { userId: userId, name: req.To },
+      });
 
       await request(app)
         .post("/expense")
         .set("Authorization", `Bearer ${token}`)
         .send(req);
 
-      const after = await db.category.findByPk(req.To);
+      const after = await db.category.findOne({
+        where: { userId: userId, name: req.To },
+      });
 
       expect(after.dataValues.balance).toBe(
         before.dataValues.balance + req.Amount
@@ -209,13 +218,14 @@ describe("POST /expense", () => {
 });
 
 describe("POST /income", () => {
-  let token;
+  let token, userId;
   beforeAll(async () => {
     const res = await request(app).post("/login").send({
       Email: "unique@user.com",
       Password: "1234567",
     });
     token = res.body.token;
+    userId = res.body.user.id;
   });
 
   describe("positive tests", () => {
@@ -271,14 +281,18 @@ describe("POST /income", () => {
     });
 
     test("should update Account balance", async () => {
-      const before = await db.account.findByPk(req.To);
+      const before = await db.account.findOne({
+        where: { userId: userId, name: req.To },
+      });
 
       await request(app)
         .post("/income")
         .set("Authorization", `Bearer ${token}`)
         .send(req);
 
-      const after = await db.account.findByPk(req.To);
+      const after = await db.account.findOne({
+        where: { userId: userId, name: req.To },
+      });
 
       expect(after.dataValues.balance).toBe(
         before.dataValues.balance + req.Amount
@@ -317,13 +331,14 @@ describe("POST /income", () => {
 });
 
 describe("POST /transfer", () => {
-  let token;
+  let token, userId;
   beforeAll(async () => {
     const res = await request(app).post("/login").send({
       Email: "unique@user.com",
       Password: "1234567",
     });
     token = res.body.token;
+    userId = res.body.user.id;
   });
 
   describe("positive tests", () => {
@@ -362,14 +377,18 @@ describe("POST /transfer", () => {
     });
 
     test("should update AccountFrom balance", async () => {
-      const before = await db.account.findByPk(req.From);
+      const before = await db.account.findOne({
+        where: { userId: userId, name: req.From },
+      });
 
       await request(app)
         .post("/transfer")
         .set("Authorization", `Bearer ${token}`)
         .send(req);
 
-      const after = await db.account.findByPk(req.From);
+      const after = await db.account.findOne({
+        where: { userId: userId, name: req.From },
+      });
 
       expect(after.dataValues.balance).toBe(
         before.dataValues.balance - req.Amount
@@ -377,14 +396,18 @@ describe("POST /transfer", () => {
     });
 
     test("should update AccountTo balance", async () => {
-      const before = await db.account.findByPk(req.To);
+      const before = await db.account.findOne({
+        where: { userId: userId, name: req.To },
+      });
 
       await request(app)
         .post("/transfer")
         .set("Authorization", `Bearer ${token}`)
         .send(req);
 
-      const after = await db.account.findByPk(req.To);
+      const after = await db.account.findOne({
+        where: { userId: userId, name: req.To },
+      });
 
       expect(after.dataValues.balance).toBe(
         before.dataValues.balance + req.Amount
@@ -429,13 +452,14 @@ describe("DELETE /expense", () => {
     From: "Visa",
     To: "Food",
   };
-  let token;
+  let token, userId;
   beforeAll(async () => {
     const res = await request(app).post("/login").send({
       Email: "unique@user.com",
       Password: "1234567",
     });
     token = res.body.token;
+    userId = res.body.user.id;
   });
 
   describe("positive tests", () => {
@@ -508,14 +532,18 @@ describe("DELETE /expense", () => {
         .set("Authorization", `Bearer ${token}`)
         .send(req);
 
-      const before = await db.account.findByPk(req.From);
+      const before = await db.account.findOne({
+        where: { userId: userId, name: req.From },
+      });
 
       await request(app)
         .delete("/expense")
         .set("Authorization", `Bearer ${token}`)
         .send(expense.body.expense);
 
-      const after = await db.account.findByPk(req.From);
+      const after = await db.account.findOne({
+        where: { userId: userId, name: req.From },
+      });
 
       expect(after.dataValues.balance).toBe(
         before.dataValues.balance + req.Amount
@@ -528,14 +556,18 @@ describe("DELETE /expense", () => {
         .set("Authorization", `Bearer ${token}`)
         .send(req);
 
-      const before = await db.category.findByPk(req.To);
+      const before = await db.category.findOne({
+        where: { userId: userId, name: req.To },
+      });
 
       await request(app)
         .delete("/expense")
         .set("Authorization", `Bearer ${token}`)
         .send(expense.body.expense);
 
-      const after = await db.category.findByPk(req.To);
+      const after = await db.category.findOne({
+        where: { userId: userId, name: req.To },
+      });
 
       expect(after.dataValues.balance).toBe(
         before.dataValues.balance - req.Amount
@@ -570,13 +602,14 @@ describe("DELETE /income", () => {
     To: "Bank",
   };
 
-  let token;
+  let token, userId;
   beforeAll(async () => {
     const res = await request(app).post("/login").send({
       Email: "unique@user.com",
       Password: "1234567",
     });
     token = res.body.token;
+    userId = res.body.user.id;
   });
 
   describe("positive tests", () => {
@@ -649,14 +682,18 @@ describe("DELETE /income", () => {
         .set("Authorization", `Bearer ${token}`)
         .send(req);
 
-      const before = await db.account.findByPk(req.To);
+      const before = await db.account.findOne({
+        where: { userId: userId, name: req.To },
+      });
 
       await request(app)
         .delete("/income")
         .set("Authorization", `Bearer ${token}`)
         .send(income.body.income);
 
-      const after = await db.account.findByPk(req.To);
+      const after = await db.account.findOne({
+        where: { userId: userId, name: req.To },
+      });
 
       expect(after.dataValues.balance).toBe(
         before.dataValues.balance - req.Amount
@@ -691,13 +728,14 @@ describe("DELETE /transfer", () => {
     To: "Visa",
   };
 
-  let token;
+  let token, userId;
   beforeAll(async () => {
     const res = await request(app).post("/login").send({
       Email: "unique@user.com",
       Password: "1234567",
     });
     token = res.body.token;
+    userId = res.body.user.id;
   });
 
   describe("positive tests", () => {
@@ -743,14 +781,18 @@ describe("DELETE /transfer", () => {
         .set("Authorization", `Bearer ${token}`)
         .send(req);
 
-      const before = await db.account.findByPk(req.From);
+      const before = await db.account.findOne({
+        where: { userId: userId, name: req.From },
+      });
 
       await request(app)
         .delete("/transfer")
         .set("Authorization", `Bearer ${token}`)
         .send(transfer.body.transfer);
 
-      const after = await db.account.findByPk(req.From);
+      const after = await db.account.findOne({
+        where: { userId: userId, name: req.From },
+      });
 
       expect(after.dataValues.balance).toBe(
         before.dataValues.balance + req.Amount
@@ -763,14 +805,18 @@ describe("DELETE /transfer", () => {
         .set("Authorization", `Bearer ${token}`)
         .send(req);
 
-      const before = await db.account.findByPk(req.To);
+      const before = await db.account.findOne({
+        where: { userId: userId, name: req.To },
+      });
 
       await request(app)
         .delete("/transfer")
         .set("Authorization", `Bearer ${token}`)
         .send(transfer.body.transfer);
 
-      const after = await db.account.findByPk(req.To);
+      const after = await db.account.findOne({
+        where: { userId: userId, name: req.To },
+      });
 
       expect(after.dataValues.balance).toBe(
         before.dataValues.balance - req.Amount

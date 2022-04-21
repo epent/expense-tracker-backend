@@ -17,13 +17,14 @@ describe("PUT /expense", () => {
     to: "Other",
   };
 
-  let token;
+  let token, userId;
   beforeAll(async () => {
     const res = await request(app).post("/login").send({
       Email: "unique@user.com",
       Password: "1234567",
     });
     token = res.body.token;
+    userId = res.body.user.id;
   });
 
   describe("positive tests", () => {
@@ -91,9 +92,13 @@ describe("PUT /expense", () => {
         .set("Authorization", `Bearer ${token}`)
         .send(oldForm);
 
-      const oldAccountBefore = await db.account.findByPk(oldForm.From);
+      const oldAccountBefore = await db.account.findOne({
+        where: { userId: userId, name: oldForm.From },
+      });
 
-      const newAccountBefore = await db.account.findByPk(newForm.from);
+      const newAccountBefore = await db.account.findOne({
+        where: { userId: userId, name: newForm.from },
+      });
 
       const newExpense = {
         ...oldExpense.body.expense,
@@ -108,9 +113,13 @@ describe("PUT /expense", () => {
           new: newExpense,
         });
 
-      const oldAccountAfter = await db.account.findByPk(oldForm.From);
+      const oldAccountAfter = await db.account.findOne({
+        where: { userId: userId, name: oldForm.From },
+      });
 
-      const newAccountAfter = await db.account.findByPk(newForm.from);
+      const newAccountAfter = await db.account.findOne({
+        where: { userId: userId, name: newForm.from },
+      });
 
       expect(oldAccountAfter.dataValues.balance).toBe(
         oldAccountBefore.dataValues.balance + oldForm.Amount
@@ -126,9 +135,13 @@ describe("PUT /expense", () => {
         .set("Authorization", `Bearer ${token}`)
         .send(oldForm);
 
-      const oldCategoryBefore = await db.category.findByPk(oldForm.To);
+      const oldCategoryBefore = await db.category.findOne({
+        where: { userId: userId, name: oldForm.To },
+      });
 
-      const newCategoryBefore = await db.category.findByPk(newForm.to);
+      const newCategoryBefore = await db.category.findOne({
+        where: { userId: userId, name: newForm.to },
+      });
 
       const newExpense = {
         ...oldExpense.body.expense,
@@ -143,9 +156,13 @@ describe("PUT /expense", () => {
           new: newExpense,
         });
 
-      const oldCategoryAfter = await db.category.findByPk(oldForm.To);
+      const oldCategoryAfter = await db.category.findOne({
+        where: { userId: userId, name: oldForm.To },
+      });
 
-      const newCategoryAfter = await db.category.findByPk(newForm.to);
+      const newCategoryAfter = await db.category.findOne({
+        where: { userId: userId, name: newForm.to },
+      });
 
       expect(oldCategoryAfter.dataValues.balance).toBe(
         oldCategoryBefore.dataValues.balance - oldForm.Amount
@@ -177,8 +194,8 @@ describe("PUT /expense", () => {
       const res = await db.expense.findByPk(oldExpense.body.expense.id);
 
       expect(res.dataValues.amount).toEqual(newForm.amount);
-      expect(res.dataValues.accountName).toEqual(newForm.from);
-      expect(res.dataValues.categoryName).toEqual(newForm.to);
+      expect(res.dataValues.from).toEqual(newForm.from);
+      expect(res.dataValues.to).toEqual(newForm.to);
     });
   });
 
@@ -283,13 +300,14 @@ describe("PUT /income", () => {
     to: "Visa",
   };
 
-  let token;
+  let token, userId;
   beforeAll(async () => {
     const res = await request(app).post("/login").send({
       Email: "unique@user.com",
       Password: "1234567",
     });
     token = res.body.token;
+    userId = res.body.user.id;
   });
 
   describe("positive tests", () => {
@@ -356,9 +374,13 @@ describe("PUT /income", () => {
         .set("Authorization", `Bearer ${token}`)
         .send(oldForm);
 
-      const oldAccountBefore = await db.account.findByPk(oldForm.To);
+      const oldAccountBefore = await db.account.findOne({
+        where: { userId: userId, name: oldForm.To },
+      });
 
-      const newAccountBefore = await db.account.findByPk(newForm.to);
+      const newAccountBefore = await db.account.findOne({
+        where: { userId: userId, name: newForm.to },
+      });
 
       const newIncome = {
         ...oldIncome.body.income,
@@ -373,9 +395,13 @@ describe("PUT /income", () => {
           new: newIncome,
         });
 
-      const oldAccountAfter = await db.account.findByPk(oldForm.To);
+      const oldAccountAfter = await db.account.findOne({
+        where: { userId: userId, name: oldForm.To },
+      });
 
-      const newAccountAfter = await db.account.findByPk(newForm.to);
+      const newAccountAfter = await db.account.findOne({
+        where: { userId: userId, name: newForm.to },
+      });
 
       expect(oldAccountAfter.dataValues.balance).toBe(
         oldAccountBefore.dataValues.balance - oldForm.Amount
@@ -407,7 +433,7 @@ describe("PUT /income", () => {
       const res = await db.income.findByPk(oldIncome.body.income.id);
 
       expect(res.dataValues.amount).toEqual(newForm.amount);
-      expect(res.dataValues.accountName).toEqual(newForm.to);
+      expect(res.dataValues.to).toEqual(newForm.to);
     });
   });
 
@@ -512,13 +538,14 @@ describe("PUT /transfer", () => {
     to: "Master card",
   };
 
-  let token;
+  let token, userId;
   beforeAll(async () => {
     const res = await request(app).post("/login").send({
       Email: "unique@user.com",
       Password: "1234567",
     });
     token = res.body.token;
+    userId = res.body.user.id;
   });
 
   describe("positive tests", () => {
@@ -549,9 +576,13 @@ describe("PUT /transfer", () => {
         .set("Authorization", `Bearer ${token}`)
         .send(oldForm);
 
-      const oldAccountBefore = await db.account.findByPk(oldForm.From);
+      const oldAccountBefore = await db.account.findOne({
+        where: { userId: userId, name: oldForm.From },
+      });
 
-      const newAccountBefore = await db.account.findByPk(newForm.from);
+      const newAccountBefore = await db.account.findOne({
+        where: { userId: userId, name: newForm.from },
+      });
 
       const newTransfer = {
         ...oldTransfer.body.transfer,
@@ -565,9 +596,13 @@ describe("PUT /transfer", () => {
           new: newTransfer,
         });
 
-      const oldAccountAfter = await db.account.findByPk(oldForm.From);
+      const oldAccountAfter = await db.account.findOne({
+        where: { userId: userId, name: oldForm.From },
+      });
 
-      const newAccountAfter = await db.account.findByPk(newForm.from);
+      const newAccountAfter = await db.account.findOne({
+        where: { userId: userId, name: newForm.from },
+      });
 
       expect(oldAccountAfter.dataValues.balance).toBe(
         oldAccountBefore.dataValues.balance + oldForm.Amount
@@ -583,9 +618,13 @@ describe("PUT /transfer", () => {
         .set("Authorization", `Bearer ${token}`)
         .send(oldForm);
 
-      const oldAccountBefore = await db.account.findByPk(oldForm.To);
+      const oldAccountBefore = await db.account.findOne({
+        where: { userId: userId, name: oldForm.To },
+      });
 
-      const newAccountBefore = await db.account.findByPk(newForm.to);
+      const newAccountBefore = await db.account.findOne({
+        where: { userId: userId, name: newForm.to },
+      });
 
       const newTransfer = {
         ...oldTransfer.body.transfer,
@@ -600,9 +639,13 @@ describe("PUT /transfer", () => {
           new: newTransfer,
         });
 
-      const oldAccountAfter = await db.account.findByPk(oldForm.To);
+      const oldAccountAfter = await db.account.findOne({
+        where: { userId: userId, name: oldForm.To },
+      });
 
-      const newAccountAfter = await db.account.findByPk(newForm.to);
+      const newAccountAfter = await db.account.findOne({
+        where: { userId: userId, name: newForm.to },
+      });
 
       expect(oldAccountAfter.dataValues.balance).toBe(
         oldAccountBefore.dataValues.balance - oldForm.Amount
@@ -634,8 +677,8 @@ describe("PUT /transfer", () => {
       const res = await db.transfer.findByPk(oldTransfer.body.transfer.id);
 
       expect(res.dataValues.amount).toEqual(newForm.amount);
-      expect(res.dataValues.accountFromName).toEqual(newForm.from);
-      expect(res.dataValues.accountToName).toEqual(newForm.to);
+      expect(res.dataValues.from).toEqual(newForm.from);
+      expect(res.dataValues.to).toEqual(newForm.to);
     });
   });
 
